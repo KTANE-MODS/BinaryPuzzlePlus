@@ -6,7 +6,7 @@ public class GeneratedPuzzles {
     public static List<Grid> Grids = new List<Grid>();
 
     //Gives a predeterminted puzzle. Placeholder until puzzle generation is implemented
-    public static void GeneratePuzzles()
+    public static void GeneratePuzzles(int size)
     {
         Grid g1 = new Grid(6);
         g1.Cells[0, 1].Value = 0;
