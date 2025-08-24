@@ -9,6 +9,7 @@ using KModkit;
 using Rnd = UnityEngine.Random;
 using static HarmonyLib.Code;
 using UnityEngine.Experimental.UIElements;
+using UnityEngine.Rendering;
 
 public class Solver {
     public static bool Solve(Grid grid)
@@ -18,6 +19,9 @@ public class Solver {
         bool blockCross;
         bool equalEdgeDown;
         bool blockThreeCol;
+        bool blockOuterRow;
+        bool blockOuterCol;
+        bool blockEdge;
 
         do
         {
@@ -25,68 +29,15 @@ public class Solver {
             blockCross = BlockCross(copyGrid);
             equalEdgeDown = EqualEdgeDown(copyGrid);
             blockThreeCol = BlockThreeCol(copyGrid);
-        } while (blockThreeRow || blockCross || equalEdgeDown || blockThreeCol);
+            blockOuterRow = BlockOuterRow(copyGrid);
+            blockOuterCol = BlockOuterCol(copyGrid);
+            blockEdge = BlockEdge(copyGrid);
+        } while (blockThreeRow || blockCross || equalEdgeDown || blockThreeCol || blockOuterRow || blockOuterCol || blockEdge);
 
 
         Debug.Log(copyGrid.Log());
         return IsSolved(copyGrid);
     }
-
-    public static bool IsSolved(Grid grid)
-    {
-        int size = grid.Size;
-        //check that all the cells are filled
-        if (!grid.CellList.All(c => c.Value != null))
-        {
-            return false;
-        }
-
-        // Check that we don’t get more than two of the same digit in a straight row/column
-        for (int row = 0; row < size; row++)
-        {
-            for (int col = 0; col < size; col++)
-            {
-                if (row >= 2 && grid.Cells[row, col].Value == grid.Cells[row - 1, col].Value && grid.Cells[row, col].Value == grid.Cells[row - 2, col].Value)
-                {
-                    return false;
-                }
-
-                if (col >= 2 && grid.Cells[row, col].Value == grid.Cells[row, col - 1].Value && grid.Cells[row, col].Value == grid.Cells[row, col - 2].Value)
-                {
-                    return false;
-                }
-            }
-        }
-
-        //For all edges that that are X's, make sure the cells are opposite
-        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.X),
-                           (a, b) => a != b))
-        {
-            return false;
-        }
-
-        //For all edges that that are ='s, make sure the cells are the same
-        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.Equals),
-                           (a, b) => a == b))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static bool ValidateEdges(IEnumerable<Edge> edges, Func<int, int, bool> condition)
-    {
-        foreach (var edge in edges)
-        {
-            if (!condition((int)edge.CellA.Value, (int)edge.CellB.Value))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
 
     private static bool BlockThreeRow(Grid grid)
     {
@@ -145,26 +96,102 @@ public class Solver {
         return madeDeduction;
     }
 
+    private static bool BlockOuterRow(Grid grid) => BlockOuter(grid, true);
+    private static bool BlockOuterCol(Grid grid) => BlockOuter(grid, false);
 
-    private static bool BlockCross(Grid grid)
+    private static bool BlockOuter(Grid grid, bool isRow)
     {
-        //if there is a cross edge that has at least one cell filled in, fill the other cell with the opposite value
-        bool blockCross = false;
-        List<Edge> crossEdges = grid.Edges.Where(e => e.State == EdgeState.X).ToList();
+        // this only works if the size is 6
+        if (grid.Size != 6)
+            return false;
 
-        foreach (Edge edge in crossEdges)
+        bool madeDeduction = false;
+        int last = grid.Size - 1;
+
+        for (int i = 0; i < grid.Size; i++)
         {
-            Cell[] cells = new Cell[] { edge.CellA, edge.CellB };
-            if (cells.Count(c => c.Value == null) == 1)
+            // Select the outer cells depending on row/col mode
+            Cell first = isRow ? grid.Cells[i, 0] : grid.Cells[0, i];
+            Cell lastC = isRow ? grid.Cells[i, last] : grid.Cells[last, i];
+            Cell second = isRow ? grid.Cells[i, 1] : grid.Cells[1, i];
+            Cell fifth = isRow ? grid.Cells[i, last - 1] : grid.Cells[last - 1, i];
+
+            // first/last must be filled and equal
+            if (first.Value == null || lastC.Value == null)
+                continue;
+            if (first.Value != lastC.Value)
+                continue;
+
+            // if either second or fifth is empty, fill them
+            if (second.Value == null || fifth.Value == null)
             {
-                Cell emptyCell = cells.First(c => c.Value == null);
-                emptyCell.Value = edge.GetOther(emptyCell).Value == 1 ? 0 : 1;
-                blockCross = true;
-                Debug.Log($"BlockCross: Row {emptyCell.Row} Col {emptyCell.Col} is {emptyCell.Value}");
+                int value = (int)first.Value == 1 ? 0 : 1;
+                second.Value = value;
+                fifth.Value = value;
+
+                if (isRow)
+                {
+                    Debug.Log($"BlockOuterRow: Row {i} Col 1 is {value}");
+                    Debug.Log($"BlockOuterRow: Row {i} Col {last - 1} is {value}");
+                }
+                else
+                {
+                    Debug.Log($"BlockOuterCol: Row 1 Col {i} is {value}");
+                    Debug.Log($"BlockOuterCol: Row {last - 1} Col {i} is {value}");
+                }
+
+                madeDeduction = true;
             }
         }
 
-        return blockCross;
+        return madeDeduction;
+    }
+
+    private static bool BlockCross(Grid grid)
+    {
+        //if there is a cross edge that has only one cell filled in, fill the other cell with the opposite value
+        return BlockEdges(
+            grid,
+            EdgeState.X,
+            (empty, other) => (other.Value == 1 ? 0 : 1), // opposite value
+            "BlockCross"
+        );
+    }
+
+    private static bool BlockEdge(Grid grid)
+    {
+        //if there is a equals edge that has only one cell filled in, fill the other cell with the same value
+        return BlockEdges(
+            grid,
+            EdgeState.Equals,
+            (empty, other) => (int)other.Value, // same value
+            "BlockEdge"
+        );
+    }
+
+
+
+    private static bool BlockEdges(Grid grid, EdgeState state, Func<Cell, Cell, int> valueSelector, string label)
+    {
+        bool madeDeduction = false;
+        List<Edge> edges = grid.Edges.Where(e => e.State == state).ToList();
+
+        foreach (Edge edge in edges)
+        {
+            Cell[] cells = { edge.CellA, edge.CellB };
+            if (cells.Count(c => c.Value == null) == 1)
+            {
+                Cell emptyCell = cells.First(c => c.Value == null);
+                Cell otherCell = edge.GetOther(emptyCell);
+
+                emptyCell.Value = valueSelector(emptyCell, otherCell);
+                madeDeduction = true;
+
+                Debug.Log($"{label}: Row {emptyCell.Row} Col {emptyCell.Col} is {emptyCell.Value}");
+            }
+        }
+
+        return madeDeduction;
     }
 
     private static bool EqualEdgeDown(Grid grid)
@@ -206,5 +233,60 @@ public class Solver {
         }
 
         return equalEdgeDown;
+    }
+
+    public static bool IsSolved(Grid grid)
+    {
+        int size = grid.Size;
+        //check that all the cells are filled
+        if (!grid.CellList.All(c => c.Value != null))
+        {
+            return false;
+        }
+
+        // Check that we don’t get more than two of the same digit in a straight row/column
+        for (int row = 0; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                if (row >= 2 && grid.Cells[row, col].Value == grid.Cells[row - 1, col].Value && grid.Cells[row, col].Value == grid.Cells[row - 2, col].Value)
+                {
+                    return false;
+                }
+
+                if (col >= 2 && grid.Cells[row, col].Value == grid.Cells[row, col - 1].Value && grid.Cells[row, col].Value == grid.Cells[row, col - 2].Value)
+                {
+                    return false;
+                }
+            }
+        }
+
+        //For all edges that that are X's, make sure the cells are opposite
+        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.X),
+                           (a, b) => a != b))
+        {
+            return false;
+        }
+
+        //For all edges that that are ='s, make sure the cells are the same
+        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.Equals),
+                           (a, b) => a == b))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool ValidateEdges(IEnumerable<Edge> edges, Func<int, int, bool> condition)
+    {
+        foreach (var edge in edges)
+        {
+            if (!condition((int)edge.CellA.Value, (int)edge.CellB.Value))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }
