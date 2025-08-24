@@ -91,11 +91,10 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         }
 
         // Check that we don’t get more than two of the same digit in a straight row/column
-        for (int row = 0; row > size; row++)
+        for (int row = 0; row < size; row++)
         {
-            for (int col = 0; col > size; col++)
+            for (int col = 0; col < size; col++)
             {
-                //these functions are very similar. This can be a function
                 if (row >= 2 && grid.Cells[row, col].Value == grid.Cells[row - 1, col].Value && grid.Cells[row, col].Value == grid.Cells[row - 2, col].Value)
                 {
                     Debug.Log("3 cells in a row");
@@ -111,31 +110,37 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         }
 
         //For all edges that that are X's, make sure the cells are opposite
-        Edge[] crossEdges = grid.Edges.Where(e => e.State == EdgeState.X).ToArray();
-
-        foreach (Edge edge in crossEdges)
+        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.X),
+                           (a, b) => a != b,
+                           "cross edge has the same value"))
         {
-            if (edge.CellA.Value == edge.CellB.Value)
-            {
-                Debug.Log("cross edge has the same value");
-                return;
-            }
+            return;
         }
 
         //For all edges that that are ='s, make sure the cells are the same
-        Edge[] equalEdges = grid.Edges.Where(e => e.State == EdgeState.Equals).ToArray();
-
-        foreach (Edge edge in equalEdges)
+        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.Equals),
+                           (a, b) => a == b,
+                           "equal edge has different values"))
         {
-            if (edge.CellA.Value != edge.CellB.Value)
-            {
-                Debug.Log("same edge has the diferent value value");
-                return;
-            }
+            return;
         }
 
         Solve();
     }
+
+    private bool ValidateEdges(IEnumerable<Edge> edges, Func<int, int, bool> condition, string message)
+    {
+        foreach (var edge in edges)
+        {
+            if (!condition((int)edge.CellA.Value, (int)edge.CellB.Value))
+            {
+                Debug.Log(message);
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public void Solve()
     {
