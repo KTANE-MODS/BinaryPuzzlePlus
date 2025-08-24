@@ -52,24 +52,8 @@ public class BinaryPuzzlePlus : MonoBehaviour {
                 c.Text = button.transform.Find("text").GetComponent<TextMesh>();
                 c.UpdateText();
 
-                //these two if statements should be turned into a function to remove duplicate code
-
-                if (c.EdgeRight != null && c.EdgeRight.State != EdgeState.None)
-                {
-                    GameObject rightEdge = Instantiate(edgePrefab, transform);
-                    rightEdge.transform.position = button.transform.position + new Vector3(Math.Abs(spacing) / (float)2, 0, 0);
-                    string edgeText = c.EdgeRight.Log();
-                    rightEdge.GetComponent<TextMesh>().text = edgeText == "." ? "" :  edgeText;
-                }
-
-                if (c.EdgeDown != null && c.EdgeDown.State != EdgeState.None)
-                {
-                    GameObject downEdge = Instantiate(edgePrefab, transform);
-                    downEdge.transform.position = button.transform.position + new Vector3(0, 0, spacing / (float)2);
-                    string edgeText = c.EdgeDown.Log();
-                    downEdge.GetComponent<TextMesh>().text = edgeText == "." ? "" : edgeText;
-                }
-
+                CreateEdge(c, c.EdgeRight, new Vector3(Math.Abs(spacing) / 2f, 0, 0), button);
+                CreateEdge(c, c.EdgeDown, new Vector3(0, 0, spacing / 2f), button);
             }
         }
 
@@ -79,12 +63,16 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         Log("Starting Grid:" + grid.Log());
     }
 
-    void Start () {
- 
-    }
- 
-    void Update () {
- 
+    private void CreateEdge(Cell c, Edge edge, Vector3 offset, GameObject button)
+    {
+        if (edge == null || edge.State == EdgeState.None)
+            return;
+
+        GameObject edgeObj = Instantiate(edgePrefab, transform);
+        edgeObj.transform.position = button.transform.position + offset;
+
+        string edgeText = edge.Log();
+        edgeObj.GetComponent<TextMesh>().text = edgeText == "." ? "" : edgeText;
     }
 
     private void Log(string s)
