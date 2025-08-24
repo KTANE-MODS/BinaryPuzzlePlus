@@ -31,6 +31,8 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         grid = GeneratedPuzzles.Grids.PickRandom();
 
         buttons = new KMSelectable[size, size];
+        List<KMSelectable> buttonList = new List<KMSelectable>();
+
         KMSelectable parentSelectable = GetComponent<KMSelectable>();
         Vector3 staringPos = new Vector3(-0.073f, 0.0154f, 0.0697f);
         for (int row = 0; row < size; row++)
@@ -41,6 +43,7 @@ public class BinaryPuzzlePlus : MonoBehaviour {
                 GameObject button = Instantiate(buttonPrefab, transform);
                 button.transform.position = staringPos + new Vector3(col * Math.Abs(spacing), 0, row * spacing);
                 KMSelectable b = button.GetComponent<KMSelectable>();
+                buttonList.Add(b);
                 b.Parent = parentSelectable;
                 b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); } return false; };
                 c.Text = button.transform.Find("text").GetComponent<TextMesh>();
@@ -67,7 +70,7 @@ public class BinaryPuzzlePlus : MonoBehaviour {
             }
         }
 
-        parentSelectable.Children = buttons.Cast<KMSelectable>().ToArray();
+        parentSelectable.Children = buttonList.ToArray();
         parentSelectable.UpdateChildrenProperly();
 
         Log(grid.Log());
