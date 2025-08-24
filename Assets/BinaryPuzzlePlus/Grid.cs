@@ -58,6 +58,42 @@ public class Grid
         }
     }
 
+    public Grid Copy()
+    {
+        Grid copy = new Grid(Size);
+
+        //Copy cell values
+        for (int r = 0; r < Size; r++)
+        {
+            for (int c = 0; c < Size; c++)
+            {
+                copy.Cells[r, c].Value = this.Cells[r, c].Value;
+            }
+        }
+
+        // Copy edge states
+        foreach (var edge in this.Edges)
+        {
+            // Find matching edge in copy by coordinates
+            var a = edge.CellA;
+            var b = edge.CellB;
+
+            var copyA = copy.Cells[a.Row, a.Col];
+            var copyB = copy.Cells[b.Row, b.Col];
+
+            // The grid constructor already created an edge between A and B.
+            // Find it in the copy and sync the state.
+            var copyEdge = copy.Edges.Find(e =>
+                (e.CellA == copyA && e.CellB == copyB) ||
+                (e.CellA == copyB && e.CellB == copyA));
+
+            if (copyEdge != null)
+                copyEdge.State = edge.State;
+        }
+
+        return copy;
+    }
+
     public string Log()
     {
         string s = "\n";
