@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class GeneratedPuzzles {
     public static List<Grid> Grids = new List<Grid>();
 

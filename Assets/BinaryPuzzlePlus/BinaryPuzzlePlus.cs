@@ -35,7 +35,12 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         ModuleId = ModuleIdCounter++;
 
         GeneratedPuzzles.GeneratePuzzles(size);
+        
+        
         grid = GeneratedPuzzles.Grids.PickRandom();
+
+        //see if the selected grid is solvable
+        Debug.Log($"{(Solver.Solve(grid) ? "solved" : "not solved")}");
 
         buttons = new KMSelectable[size, size];
 
@@ -55,7 +60,7 @@ public class BinaryPuzzlePlus : MonoBehaviour {
                 KMSelectable b = button.GetComponent<KMSelectable>();
                 buttonList.Add(b);
                 b.Parent = parentSelectable;
-                b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); if(IsSolved()) Solve(); } return false; };
+                b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); if(Solver.IsSolved(grid)) Solve(); } return false; };
                 c.Text = button.transform.Find("text").GetComponent<TextMesh>();
                 c.UpdateText();
 
@@ -105,62 +110,6 @@ public class BinaryPuzzlePlus : MonoBehaviour {
     {
         Debug.Log($"[Binary Puzzle Plus #{ModuleId}] {s}");
     }
-
-    bool IsSolved()
-    {
-
-        //check that all the cells are filled
-        if (!grid.CellList.All(c => c.Value != null))
-        {
-            return false;
-        }
-
-        // Check that we don’t get more than two of the same digit in a straight row/column
-        for (int row = 0; row < size; row++)
-        {
-            for (int col = 0; col < size; col++)
-            {
-                if (row >= 2 && grid.Cells[row, col].Value == grid.Cells[row - 1, col].Value && grid.Cells[row, col].Value == grid.Cells[row - 2, col].Value)
-                {
-                    return false;
-                }
-
-                if (col >= 2 && grid.Cells[row, col].Value == grid.Cells[row, col - 1].Value && grid.Cells[row, col].Value == grid.Cells[row, col - 2].Value)
-                {
-                    return false;
-                }
-            }
-        }
-
-        //For all edges that that are X's, make sure the cells are opposite
-        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.X),
-                           (a, b) => a != b))
-        {
-            return false;
-        }
-
-        //For all edges that that are ='s, make sure the cells are the same
-        if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.Equals),
-                           (a, b) => a == b))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool ValidateEdges(IEnumerable<Edge> edges, Func<int, int, bool> condition)
-    {
-        foreach (var edge in edges)
-        {
-            if (!condition((int)edge.CellA.Value, (int)edge.CellB.Value))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
 
     public void Solve()
     {
