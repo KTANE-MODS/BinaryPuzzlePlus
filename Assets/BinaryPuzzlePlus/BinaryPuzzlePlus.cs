@@ -55,7 +55,7 @@ public class BinaryPuzzlePlus : MonoBehaviour {
                 KMSelectable b = button.GetComponent<KMSelectable>();
                 buttonList.Add(b);
                 b.Parent = parentSelectable;
-                b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); CheckForSolve(); } return false; };
+                b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); if(IsSolved()) Solve(); } return false; };
                 c.Text = button.transform.Find("text").GetComponent<TextMesh>();
                 c.UpdateText();
 
@@ -106,13 +106,13 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         Debug.Log($"[Binary Puzzle Plus #{ModuleId}] {s}");
     }
 
-    void CheckForSolve()
+    bool IsSolved()
     {
 
         //check that all the cells are filled
         if (!grid.CellList.All(c => c.Value != null))
         {
-            return;
+            return false;
         }
 
         // Check that we don’t get more than two of the same digit in a straight row/column
@@ -122,12 +122,12 @@ public class BinaryPuzzlePlus : MonoBehaviour {
             {
                 if (row >= 2 && grid.Cells[row, col].Value == grid.Cells[row - 1, col].Value && grid.Cells[row, col].Value == grid.Cells[row - 2, col].Value)
                 {
-                    return;
+                    return false;
                 }
 
                 if (col >= 2 && grid.Cells[row, col].Value == grid.Cells[row, col - 1].Value && grid.Cells[row, col].Value == grid.Cells[row, col - 2].Value)
                 {
-                    return;
+                    return false;
                 }
             }
         }
@@ -136,17 +136,17 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.X),
                            (a, b) => a != b))
         {
-            return;
+            return false;
         }
 
         //For all edges that that are ='s, make sure the cells are the same
         if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.Equals),
                            (a, b) => a == b))
         {
-            return;
+            return false;
         }
 
-        Solve();
+        return true;
     }
 
     private bool ValidateEdges(IEnumerable<Edge> edges, Func<int, int, bool> condition)
@@ -168,7 +168,7 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         BombModule.HandlePass();
 
         Log("Submitted Grid:" + grid.Log());
-        Log("Module Solve");
+        Log("Module Solved");
     }
 
 #pragma warning disable 414
