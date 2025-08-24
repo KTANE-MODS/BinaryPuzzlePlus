@@ -16,23 +16,29 @@ public class Solver {
     {
         Grid copyGrid = grid.Copy();
         bool blockThreeRow;
-        bool blockCross;
-        bool equalEdgeDown;
         bool blockThreeCol;
-        bool blockOuterRow;
-        bool blockOuterCol;
+
+        bool blockCross;
         bool blockEdge;
 
+        bool equalEdgeDown;
+        bool equalEdgeUp;
+        bool equalEdgeLeft;
+        bool equalEdgeRight;
+
+        bool blockOuterRow;
+        bool blockOuterCol;
         do
         {
             blockThreeRow = BlockThreeRow(copyGrid);
             blockCross = BlockCross(copyGrid);
             equalEdgeDown = EqualEdgeDown(copyGrid);
+            equalEdgeUp = EqualEdgeUp(copyGrid);
             blockThreeCol = BlockThreeCol(copyGrid);
             blockOuterRow = BlockOuterRow(copyGrid);
             blockOuterCol = BlockOuterCol(copyGrid);
             blockEdge = BlockEdge(copyGrid);
-        } while (blockThreeRow || blockCross || equalEdgeDown || blockThreeCol || blockOuterRow || blockOuterCol || blockEdge);
+        } while (blockThreeRow || blockCross || equalEdgeDown || equalEdgeUp || blockThreeCol || blockOuterRow || blockOuterCol || blockEdge);
 
 
         Debug.Log(copyGrid.Log());
@@ -233,6 +239,47 @@ public class Solver {
         }
 
         return equalEdgeDown;
+    }
+
+    private static bool EqualEdgeUp(Grid grid)
+    {
+        int size = grid.Size;
+        bool madeDetuction = false;
+        //look at the two cells above the current one
+        for (int row = 2; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                //check if this cell is filled
+                Cell currentCell = grid.Cells[row, col];
+                if (currentCell.Value == null)
+                {
+                    continue;
+                }
+
+                Cell topCell = currentCell.CellUp;
+
+                //check to see the other two cells are empty
+                Cell[] topCells = new Cell[] { topCell, topCell.CellUp };
+                if (topCells.All(c => c.Value != null))
+                {
+                    continue;
+                }
+
+                //check to see if there is an equal edge between the top two
+                if (topCell.EdgeUp != null && topCell.EdgeUp.State == EdgeState.Equals)
+                {
+                    int value = currentCell.Value == 1 ? 0 : 1;
+                    topCell.Value = value;
+                    topCell.CellUp.Value = value;
+                    madeDetuction = true;
+                    Debug.Log($"EqualEdgeDown: Row {topCell.Row} Col {topCell.Col} is {topCell.Value}");
+                    Debug.Log($"EqualEdgeDown: Row {topCell.Row} Col {topCell.Col - 1} is {topCell.Value}");
+                }
+            }
+        }
+
+        return madeDetuction;
     }
 
     public static bool IsSolved(Grid grid)
