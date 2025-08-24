@@ -112,7 +112,6 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         //check that all the cells are filled
         if (!grid.CellList.All(c => c.Value != null))
         {
-            Debug.Log("Not all cells filled");
             return;
         }
 
@@ -123,13 +122,11 @@ public class BinaryPuzzlePlus : MonoBehaviour {
             {
                 if (row >= 2 && grid.Cells[row, col].Value == grid.Cells[row - 1, col].Value && grid.Cells[row, col].Value == grid.Cells[row - 2, col].Value)
                 {
-                    Debug.Log("3 cells in a row");
                     return;
                 }
 
                 if (col >= 2 && grid.Cells[row, col].Value == grid.Cells[row, col - 1].Value && grid.Cells[row, col].Value == grid.Cells[row, col - 2].Value)
                 {
-                    Debug.Log("3 cells in a col");
                     return;
                 }
             }
@@ -137,16 +134,14 @@ public class BinaryPuzzlePlus : MonoBehaviour {
 
         //For all edges that that are X's, make sure the cells are opposite
         if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.X),
-                           (a, b) => a != b,
-                           "cross edge has the same value"))
+                           (a, b) => a != b))
         {
             return;
         }
 
         //For all edges that that are ='s, make sure the cells are the same
         if (!ValidateEdges(grid.Edges.Where(e => e.State == EdgeState.Equals),
-                           (a, b) => a == b,
-                           "equal edge has different values"))
+                           (a, b) => a == b))
         {
             return;
         }
@@ -154,13 +149,12 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         Solve();
     }
 
-    private bool ValidateEdges(IEnumerable<Edge> edges, Func<int, int, bool> condition, string message)
+    private bool ValidateEdges(IEnumerable<Edge> edges, Func<int, int, bool> condition)
     {
         foreach (var edge in edges)
         {
             if (!condition((int)edge.CellA.Value, (int)edge.CellB.Value))
             {
-                Debug.Log(message);
                 return false;
             }
         }
