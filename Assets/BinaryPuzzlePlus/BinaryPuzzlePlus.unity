@@ -261,6 +261,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buttonPrefab: {fileID: 1465122724785108, guid: cf41eaf5b32a2f84aadda8e5de5a815d,
     type: 2}
+  edgePrefab: {fileID: 1361583359137324, guid: 6d1395abb682fea4bad01eea1037bc12, type: 2}
 --- !u!114 &633792351
 MonoBehaviour:
   m_ObjectHideFlags: 0

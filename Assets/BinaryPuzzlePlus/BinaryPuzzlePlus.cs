@@ -11,6 +11,8 @@ public class BinaryPuzzlePlus : MonoBehaviour {
 
     [SerializeField]
     private GameObject buttonPrefab;
+    [SerializeField]
+    private GameObject edgePrefab;
 
     static int ModuleIdCounter = 1;
     int ModuleId;
@@ -43,6 +45,26 @@ public class BinaryPuzzlePlus : MonoBehaviour {
                 b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); } return false; };
                 c.Text = button.GetComponent<TextMesh>();
                 c.UpdateText();
+
+                //these two if statements should be turned into a function to remove duplicate code
+
+                if (c.EdgeRight != null && c.EdgeRight.State != EdgeState.None)
+                {
+                    GameObject rightEdge = Instantiate(edgePrefab, transform);
+                    rightEdge.transform.position = button.transform.position + new Vector3(Math.Abs(spacing) / (float)2, 0, 0);
+                    string edgeText = c.EdgeRight.Log();
+                    rightEdge.GetComponent<TextMesh>().text = edgeText == "." ? "" :  edgeText;
+                }
+
+
+
+                if (c.EdgeDown != null && c.EdgeDown.State != EdgeState.None)
+                {
+                    GameObject downEdge = Instantiate(edgePrefab, transform);
+                    downEdge.transform.position = button.transform.position + new Vector3(0, 0, Math.Abs(spacing) / (float)2);
+                    string edgeText = c.EdgeDown.Log();
+                    downEdge.GetComponent<TextMesh>().text = edgeText == "." ? "" : edgeText;
+                }
 
             }
         }

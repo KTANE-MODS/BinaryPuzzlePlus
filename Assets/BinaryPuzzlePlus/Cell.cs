@@ -68,4 +68,10 @@ public class Cell
     {
         return Value == null ? "-" : Value.ToString();
     }
+
+    public void SetPermanance(int value)
+    {
+        Value = value;
+        Permanent = true;
+    }
 }
