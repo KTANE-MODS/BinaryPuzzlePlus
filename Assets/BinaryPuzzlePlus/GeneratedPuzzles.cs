@@ -10,10 +10,10 @@ public class GeneratedPuzzles {
     {
         Grid g1 = new Grid(6);
         
-        g1.Cells[0, 1].SetPermanance(0);
-        g1.Cells[0, 2].SetPermanance(0);
-        g1.Cells[0, 3].SetPermanance(1);
-        g1.Cells[0, 4].SetPermanance(1);
+        g1.Cells[0, 1].SetPermanance(1);
+        g1.Cells[0, 2].SetPermanance(1);
+        g1.Cells[0, 3].SetPermanance(0);
+        g1.Cells[0, 4].SetPermanance(0);
         g1.Cells[0, 5].EdgeDown.State = EdgeState.X;
 
         g1.Cells[1, 1].EdgeDown.State = EdgeState.Equals;

@@ -39,7 +39,7 @@ public class BinaryPuzzlePlus : MonoBehaviour {
             {
                 Cell c = grid.Cells[row, col];
                 GameObject button = Instantiate(buttonPrefab, transform);
-                button.transform.position = staringPos + new Vector3(row * Math.Abs(spacing), 0, col * spacing);
+                button.transform.position = staringPos + new Vector3(col * Math.Abs(spacing), 0, row * spacing);
                 KMSelectable b = button.GetComponent<KMSelectable>();
                 b.Parent = parentSelectable;
                 b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); } return false; };
@@ -56,12 +56,10 @@ public class BinaryPuzzlePlus : MonoBehaviour {
                     rightEdge.GetComponent<TextMesh>().text = edgeText == "." ? "" :  edgeText;
                 }
 
-
-
                 if (c.EdgeDown != null && c.EdgeDown.State != EdgeState.None)
                 {
                     GameObject downEdge = Instantiate(edgePrefab, transform);
-                    downEdge.transform.position = button.transform.position + new Vector3(0, 0, Math.Abs(spacing) / (float)2);
+                    downEdge.transform.position = button.transform.position + new Vector3(0, 0, spacing / (float)2);
                     string edgeText = c.EdgeDown.Log();
                     downEdge.GetComponent<TextMesh>().text = edgeText == "." ? "" : edgeText;
                 }
