@@ -7,6 +7,7 @@ using UnityEngine;
 using KModkit;
 using Rnd = UnityEngine.Random;
 using static HarmonyLib.Code;
+using UnityEngine.Experimental.UIElements;
 
 public class BinaryPuzzlePlus : MonoBehaviour {
 
@@ -15,6 +16,8 @@ public class BinaryPuzzlePlus : MonoBehaviour {
     private GameObject buttonPrefab;
     [SerializeField]
     private GameObject edgePrefab;
+    [SerializeField]
+    private KMSelectable resetButton;
 
     static int ModuleIdCounter = 1;
     int ModuleId;
@@ -23,7 +26,8 @@ public class BinaryPuzzlePlus : MonoBehaviour {
     private Grid grid;
     const int size = 6;
 
-    private KMSelectable[,] buttons; 
+    private KMSelectable[,] buttons;
+
 
     void Awake () {
         BombModule = GetComponent<KMBombModule>();
@@ -34,10 +38,13 @@ public class BinaryPuzzlePlus : MonoBehaviour {
         grid = GeneratedPuzzles.Grids.PickRandom();
 
         buttons = new KMSelectable[size, size];
-        List<KMSelectable> buttonList = new List<KMSelectable>();
 
         KMSelectable parentSelectable = GetComponent<KMSelectable>();
         Vector3 staringPos = new Vector3(-0.073f, 0.0154f, 0.0697f);
+
+        resetButton.OnInteract += delegate () { if (!ModuleSolved) { ResetBoard(); } return false; };
+        List<KMSelectable> buttonList = new List<KMSelectable>();
+
         for (int row = 0; row < size; row++)
         {
             for (int col = 0; col < size; col++)
@@ -57,10 +64,29 @@ public class BinaryPuzzlePlus : MonoBehaviour {
             }
         }
 
+        buttonList.Add(resetButton);
+
         parentSelectable.Children = buttonList.ToArray();
         parentSelectable.UpdateChildrenProperly();
 
         Log("Starting Grid:" + grid.Log());
+    }
+
+    private void ResetBoard()
+    {
+        for (int row = 0; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                Cell c = grid.Cells[row, col];
+                if (!c.Permanent)
+                {
+                    c.Value = null;
+                }
+                c.UpdateText();
+
+            }
+        }
     }
 
     private void CreateEdge(Cell c, Edge edge, Vector3 offset, GameObject button)
