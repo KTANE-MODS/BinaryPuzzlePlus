@@ -1,13 +1,20 @@
-﻿public class Grid
+﻿using NUnit.Framework;
+using System.Collections.Generic;
+
+public class Grid
 {
 
     public int Size { get; }
     public Cell[,] Cells { get; }
+    public List<Cell> CellList { get; }
+    public List<Edge> Edges { get; }
 
     public Grid(int size)
     {
         Size = size;
         Cells = new Cell[size, size];
+        Edges = new List<Edge>();
+        CellList = new List<Cell>();
 
         // Create all cells
         for (int r = 0; r < Size; r++)
@@ -20,11 +27,13 @@
             for (int c = 0; c < Size; c++)
             {
                 var cell = Cells[r, c];
+                CellList.Add(cell);
 
                 if (r > 0)
                 {
                     var neighbor = Cells[r - 1, c];
                     var edge = new Edge(cell, neighbor);
+                    Edges.Add(edge);
 
                     cell.CellUp = neighbor;
                     cell.EdgeUp = edge;
@@ -37,6 +46,7 @@
                 {
                     var neighbor = Cells[r, c - 1];
                     var edge = new Edge(cell, neighbor);
+                    Edges.Add(edge);
 
                     cell.CellLeft = neighbor;
                     cell.EdgeLeft = edge;
