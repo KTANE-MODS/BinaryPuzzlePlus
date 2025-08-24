@@ -43,7 +43,7 @@ public class BinaryPuzzlePlus : MonoBehaviour {
                 KMSelectable b = button.GetComponent<KMSelectable>();
                 b.Parent = parentSelectable;
                 b.GetComponent<KMSelectable>().OnInteract += delegate () { if (!ModuleSolved) { c.Interact(); } return false; };
-                c.Text = button.GetComponent<TextMesh>();
+                c.Text = button.transform.Find("text").GetComponent<TextMesh>();
                 c.UpdateText();
 
                 //these two if statements should be turned into a function to remove duplicate code

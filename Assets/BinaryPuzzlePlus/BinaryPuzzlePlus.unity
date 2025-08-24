@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6121698d53055a46bc06b4583486331, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buttonPrefab: {fileID: 1465122724785108, guid: cf41eaf5b32a2f84aadda8e5de5a815d,
+  buttonPrefab: {fileID: 1695256713760438, guid: cf41eaf5b32a2f84aadda8e5de5a815d,
     type: 2}
   edgePrefab: {fileID: 1361583359137324, guid: 6d1395abb682fea4bad01eea1037bc12, type: 2}
 --- !u!114 &633792351

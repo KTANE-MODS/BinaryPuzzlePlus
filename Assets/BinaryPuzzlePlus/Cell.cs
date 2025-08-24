@@ -56,7 +56,8 @@ public class Cell
 
     public void UpdateText()
     {
-        Text.text = GetCellString();
+        string s = GetCellString();
+        Text.text = s == "-" ? "" : s;
     }
 
     public string Log()
