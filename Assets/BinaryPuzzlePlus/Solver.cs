@@ -10,6 +10,7 @@ using Rnd = UnityEngine.Random;
 using static HarmonyLib.Code;
 using UnityEngine.Experimental.UIElements;
 using UnityEngine.Rendering;
+using NUnit.Framework.Internal.Execution;
 
 public class Solver {
     public static bool Solve(Grid grid)
@@ -28,6 +29,8 @@ public class Solver {
 
         bool blockOuterRow;
         bool blockOuterCol;
+
+        bool fillRow;
         do
         {
             blockThreeRow = BlockThreeRow(copyGrid);
@@ -38,7 +41,8 @@ public class Solver {
             blockOuterRow = BlockOuterRow(copyGrid);
             blockOuterCol = BlockOuterCol(copyGrid);
             blockEdge = BlockEdge(copyGrid);
-        } while (blockThreeRow || blockCross || equalEdgeDown || equalEdgeUp || blockThreeCol || blockOuterRow || blockOuterCol || blockEdge);
+            fillRow = FillRow(copyGrid);
+        } while (blockThreeRow || blockCross || equalEdgeDown || equalEdgeUp || blockThreeCol || blockOuterRow || blockOuterCol || blockEdge || fillRow);
 
 
         Debug.Log(copyGrid.Log());
@@ -175,8 +179,6 @@ public class Solver {
         );
     }
 
-
-
     private static bool BlockEdges(Grid grid, EdgeState state, Func<Cell, Cell, int> valueSelector, string label)
     {
         bool madeDeduction = false;
@@ -233,7 +235,7 @@ public class Solver {
                     bottomCell.CellDown.Value = value;
                     equalEdgeDown = true;
                     Debug.Log($"EqualEdgeDown: Row {bottomCell.Row} Col {bottomCell.Col} is {bottomCell.Value}");
-                    Debug.Log($"EqualEdgeDown: Row {bottomCell.Row} Col {bottomCell.Col + 1} is {bottomCell.Value}");
+                    Debug.Log($"EqualEdgeDown: Row {bottomCell.Row + 1} Col {bottomCell.Col} is {bottomCell.Value}");
                 }
             }
         }
@@ -274,9 +276,44 @@ public class Solver {
                     topCell.CellUp.Value = value;
                     madeDetuction = true;
                     Debug.Log($"EqualEdgeDown: Row {topCell.Row} Col {topCell.Col} is {topCell.Value}");
-                    Debug.Log($"EqualEdgeDown: Row {topCell.Row} Col {topCell.Col - 1} is {topCell.Value}");
+                    Debug.Log($"EqualEdgeDown: Row {topCell.Row - 1} Col {topCell.Col} is {topCell.Value}");
                 }
             }
+        }
+
+        return madeDetuction;
+    }
+
+    private static bool FillRow(Grid grid)
+    { 
+        int size = grid.Size;
+        int halfSize = grid.Size / 2;
+        bool madeDetuction = false;
+        
+        for (int row = 0; row < size; row++)
+        {
+            //count the number of ones and zeros
+
+            List<Cell> relevantCells = grid.CellList.Where(c => c.Row == row).ToList();
+
+            int oneCount = relevantCells.Count(c => c.Value == 1);
+            int zeroCount = relevantCells.Count(c => c.Value == 0);
+
+            //if only one of them equals half the size, fill the empty with the other value
+            if (oneCount == halfSize ^ zeroCount == halfSize)
+            { 
+                int val = zeroCount == halfSize ? 1 : 0;
+                List<Cell> emptyCells = relevantCells.Where(c => c.Value == null).ToList();
+
+                foreach (Cell c in emptyCells)
+                {
+                    c.Value = val;
+                    Debug.Log($"FillRow: Row {c.Row} Col {c.Col} is {c.Value}");
+                    madeDetuction = true;
+                }
+
+            }
+
         }
 
         return madeDetuction;
