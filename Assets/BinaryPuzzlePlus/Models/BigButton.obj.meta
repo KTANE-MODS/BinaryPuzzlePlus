@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 56c38d7f2e4175c4fbb357daacdb0be4
+guid: d2a3e436224989543bf8c65238a5a3b7
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
-    100000: Button
+    100000: BigButton
     100002: //RootNode
-    400000: Button
+    400000: BigButton
     400002: //RootNode
-    2100000: ButtonMat
-    2300000: Button
-    3300000: Button
-    4300000: Button
+    2100000: BigButtonMat
+    2300000: BigButton
+    3300000: BigButton
+    4300000: BigButton
   externalObjects: {}
   materials:
     importMaterials: 1
