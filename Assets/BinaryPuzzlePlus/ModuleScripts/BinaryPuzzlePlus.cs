@@ -7,7 +7,12 @@ public class BinaryPuzzlePlus : MonoBehaviour
     [SerializeField]
     private GameObject buttonPrefab;
     [SerializeField]
+    private GameObject edgePrefab;
+    [SerializeField]
     private KMSelectable resetButton;
+
+    private GameObject[] leftEdges;
+    private GameObject[] upEdges;
 
     private List<Button> buttons;
 
@@ -46,12 +51,41 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     private PuzzleState solution; //the generated solution to the puzzle
 
+
+
+    void Awake()
+    {
+        ModuleId = ModuleIdCounter++;
+    }
+
+    void Start()
+    {
+        PuzzleGenerator.LongGeneration = longGeneration;
+        PuzzleGenerator.Size = size;
+        PuzzleGenerator.DistinctRows = distinctRows;
+        PuzzleGenerator.ConstraintRemovalPercentage = constraintRemovalPercentage;
+        solution = PuzzleGenerator.GeneratePuzzle();
+        ConfigurePuzzleGrid();
+        UpdateVisuals(solution);
+
+        Log("Puzzle Settings");
+        Log($"Long Generation: {longGeneration}");
+        Log($"Size: {size}");
+        Log($"Distinct Rows: {distinctRows}");
+        Log($"Constraint Removal Percentage: {constraintRemovalPercentage}");
+
+        Log("Solution\n"+solution.ToString());
+    }
+
     /// <summary>
     /// Instantiates buttons in a grid based on the size variables
     /// </summary>
     private void ConfigurePuzzleGrid()
     {
         buttons = new List<Button>();
+        leftEdges = new GameObject[size * size];
+        upEdges = new GameObject[size * size];
+
         //instantiate the buttons base on the size
 
         //local starting/ending position of the puzzle grid
@@ -88,28 +122,66 @@ public class BinaryPuzzlePlus : MonoBehaviour
                 );
             }
         }
+
+        //for each left edge, instantiate an edge prefab in the middle of the two buttons it connects
+        for (int ix = 0; ix < buttons.Count; ix++)
+        {
+            int row = ix / size;
+            int col = ix % size;
+
+            if (col != 0)
+            {
+                Button button = buttons[ix];
+                Button leftButton = buttons[ix - 1];
+                Vector3 edgePosition = Vector3.Lerp(leftButton.MeshRenderer.gameObject.transform.localPosition, button.MeshRenderer.gameObject.transform.localPosition, 0.5f);
+                GameObject edge = Instantiate(edgePrefab, transform);
+                edge.transform.localPosition = edgePosition;
+                leftEdges[ix] = edge;
+            }
+
+            if (row != 0)
+            {
+                Button button = buttons[ix];
+                Button upButton = buttons[ix - size];
+                Vector3 edgePosition = Vector3.Lerp(upButton.MeshRenderer.gameObject.transform.localPosition, button.MeshRenderer.gameObject.transform.localPosition, 0.5f);
+                GameObject edge = Instantiate(edgePrefab, transform);
+                edge.transform.localPosition = edgePosition;
+                edge.transform.Rotate(0, 0, 90);
+                upEdges[ix] = edge;
+            }
+        }
     }
 
-    void Awake()
+    /// <summary>
+    /// Updates the visuals of the modules to reflect a puzzle state
+    /// </summary>
+    void UpdateVisuals(PuzzleState state)
     {
-        ModuleId = ModuleIdCounter++;
-    }
+        for (int ix = 0; ix < size * size; ix++)
+        { 
+            Cell c = state.Cells[ix];
+            Button b = buttons[ix];
+            GameObject leftEdge = leftEdges[ix];
+            GameObject upEdge = upEdges[ix];
 
-    void Start()
-    {
-        ConfigurePuzzleGrid();
-        PuzzleGenerator.LongGeneration = longGeneration;
-        PuzzleGenerator.Size = size;
-        PuzzleGenerator.DistinctRows = distinctRows;
-        PuzzleGenerator.ConstraintRemovalPercentage = constraintRemovalPercentage;
+            //change the background color
+            b.MeshRenderer.sharedMaterial = c.state == CellState.Empty ? defaultMaterial : c.state == CellState.One ? yellowMaterial : blueMaterial;
 
-        solution = PuzzleGenerator.GeneratePuzzle();
-        Debug.Log(solution.ToString());
-    }
+            //change the text
+            b.Label.text = c.state == CellState.Empty ? "" : c.state == CellState.One ? "1": "0";
 
-    void Update()
-    {
+            //set edges that exist
+            if (leftEdge != null)
+            {
+                leftEdge.GetComponent<TextMesh>().text = c.Left.Constraint == EdgeState.X ? "X" : c.Left.Constraint == EdgeState.Equal ? "=" : "";
+            }
 
+            //set edges that exist
+            if (upEdge != null)
+            {
+                upEdge.GetComponent<TextMesh>().text = c.Up.Constraint == EdgeState.X ? "X" : c.Up.Constraint == EdgeState.Equal ? "=" : "";
+            }
+        }
     }
 
     private void Log(string message)

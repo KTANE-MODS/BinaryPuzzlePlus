@@ -27,7 +27,9 @@ public static class PuzzleGenerator {
         //generate a puzzle. Otherwise, generate the cells and edges at the same time. This makes the space to
         //search for a puzzle 2^(size*size) * 3^(2*r*c-r-c) before pruning. But it's a more authentic generation
         //method since the constraints are added at the same time as the cells are generated.
-        PuzzleState solution = GeneratePuzzleIndex(new PuzzleState(Size), new bool[Size * Size], new bool[Size * Size], new bool[Size * Size], 0).First();
+        PuzzleState solution = new PuzzleState(Size);
+
+        solution = GeneratePuzzleIndex(solution, new bool[Size * Size], new bool[Size * Size], new bool[Size * Size], 0).First();
         if (!LongGeneration)
         { 
             AddConstraints(solution);
