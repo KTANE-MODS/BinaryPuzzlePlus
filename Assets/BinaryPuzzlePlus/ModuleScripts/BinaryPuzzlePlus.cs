@@ -89,8 +89,8 @@ public class BinaryPuzzlePlus : MonoBehaviour
         //instantiate the buttons base on the size
 
         //local starting/ending position of the puzzle grid
-        Vector2 startingPosition = new Vector2(-0.074f, 0.0321f);
-        Vector2 endingPosition = new Vector2(0.0789f, -0.0705f);
+        Vector2 startingPosition = new Vector2(-0.0561f, 0.0351f);
+        Vector2 endingPosition = new Vector2(0.0561f, -0.0771f);
 
         //figure out the width and height of each button
         float desiredWidth = Mathf.Abs(endingPosition.x - startingPosition.x) / size;
@@ -100,8 +100,8 @@ public class BinaryPuzzlePlus : MonoBehaviour
         float currentWidh = buttonPrefab.GetComponent<Renderer>().bounds.size.x;
         float currentHeight = buttonPrefab.GetComponent<Renderer>().bounds.size.z;
 
-        float xScale = (desiredWidth * buttonPrefab.transform.localScale.x) / currentWidh;
-        float zScale = (desiredWidth * buttonPrefab.transform.localScale.z) / currentHeight;
+        float xScale = (desiredWidth * buttonPrefab.transform.localScale.x) / currentWidh * 1.18f;
+        float zScale = (desiredWidth * buttonPrefab.transform.localScale.z) / currentHeight * 1.18f;
 
         //Populate the grid with buttons starting from the starting position and moving across and down to the ending position
         for (int row = 0; row < size; row++)
@@ -123,17 +123,21 @@ public class BinaryPuzzlePlus : MonoBehaviour
             }
         }
 
+
         //for each left edge, instantiate an edge prefab in the middle of the two buttons it connects
         for (int ix = 0; ix < buttons.Count; ix++)
         {
             int row = ix / size;
             int col = ix % size;
 
+            //Make the edge appear above the button
+            const float yPosition = 0.02584f;
             if (col != 0)
             {
                 Button button = buttons[ix];
                 Button leftButton = buttons[ix - 1];
                 Vector3 edgePosition = Vector3.Lerp(leftButton.MeshRenderer.gameObject.transform.localPosition, button.MeshRenderer.gameObject.transform.localPosition, 0.5f);
+                edgePosition.y = yPosition;
                 GameObject edge = Instantiate(edgePrefab, transform);
                 edge.transform.localPosition = edgePosition;
                 leftEdges[ix] = edge;
@@ -144,9 +148,10 @@ public class BinaryPuzzlePlus : MonoBehaviour
                 Button button = buttons[ix];
                 Button upButton = buttons[ix - size];
                 Vector3 edgePosition = Vector3.Lerp(upButton.MeshRenderer.gameObject.transform.localPosition, button.MeshRenderer.gameObject.transform.localPosition, 0.5f);
+                edgePosition.y = yPosition;
                 GameObject edge = Instantiate(edgePrefab, transform);
+                edge.transform.Rotate(0, 90, 0);
                 edge.transform.localPosition = edgePosition;
-                edge.transform.Rotate(0, 0, 90);
                 upEdges[ix] = edge;
             }
         }
@@ -171,16 +176,27 @@ public class BinaryPuzzlePlus : MonoBehaviour
             b.Label.text = c.state == CellState.Empty ? "" : c.state == CellState.One ? "1": "0";
 
             //set edges that exist
-            if (leftEdge != null)
-            {
-                leftEdge.GetComponent<TextMesh>().text = c.Left.Constraint == EdgeState.X ? "X" : c.Left.Constraint == EdgeState.Equal ? "=" : "";
-            }
 
-            //set edges that exist
+            if(leftEdge != null)
+                ChangeEdgeSymbol(leftEdge, c.Left.Constraint);
+
             if (upEdge != null)
-            {
-                upEdge.GetComponent<TextMesh>().text = c.Up.Constraint == EdgeState.X ? "X" : c.Up.Constraint == EdgeState.Equal ? "=" : "";
-            }
+                ChangeEdgeSymbol(upEdge, c.Up.Constraint);
+        }
+    }
+
+    void ChangeEdgeSymbol(GameObject edge, EdgeState state)
+    {
+        //if the edge exists, but the text is "", write hide the gameobject
+        string text = state == EdgeState.X ? "X" : state == EdgeState.Equal ? "=" : "";
+        if(text == "")
+        {
+            edge.SetActive(false);
+            return;
+        }
+        else
+        {
+            edge.transform.Find("Text").GetComponent<TextMesh>().text = text;
         }
     }
 
