@@ -23,7 +23,7 @@ public static class PuzzleGenerator {
     /// <returns>The generated puzzle</returns>
     public static PuzzleState GeneratePuzzle()
     {
-        //if LongGeneration is true, Generate the cells first, then edges afterwards to reduce the time it takes to
+        //if LongGeneration is false, Generate the cells first, then edges afterwards to reduce the time it takes to
         //generate a puzzle. Otherwise, generate the cells and edges at the same time. This makes the space to
         //search for a puzzle 2^(size*size) * 3^(2*r*c-r-c) before pruning. But it's a more authentic generation
         //method since the constraints are added at the same time as the cells are generated.

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 18900aab9aa83df499638b527c7f3f4c
+guid: 6d2687cfdfb9e4f4db3637671fc9e839
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -8,10 +8,12 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: Arial
+  fontName: Courier New
   fontNames:
-  - Arial
-  fallbackFontReferences: []
+  - Courier New
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 0793065254071644182d20cad325ee06, type: 3}
+  - {fileID: 12800000, guid: 00bc7c36f987693488e1e3de39753785, type: 3}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1

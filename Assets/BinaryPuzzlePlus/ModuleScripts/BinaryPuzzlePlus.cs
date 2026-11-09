@@ -91,8 +91,9 @@ public class BinaryPuzzlePlus : MonoBehaviour
         //instantiate the buttons base on the size
 
         //local starting/ending position of the puzzle grid
-        Vector2 startingPosition = new Vector2(-0.0561f, 0.0351f);
-        Vector2 endingPosition = new Vector2(0.0561f, -0.0771f);
+        Vector2 startingPosition = new Vector2(-0.0561f, 0.0466f);
+        const float puzzleDimension = 0.1122f;
+        Vector2 endingPosition = startingPosition + new Vector2(puzzleDimension, -puzzleDimension);
 
         //figure out the width and height of each button
         float desiredWidth = Mathf.Abs(endingPosition.x - startingPosition.x) / size;
@@ -182,27 +183,25 @@ public class BinaryPuzzlePlus : MonoBehaviour
             b.Label.text = c.state == CellState.Empty ? "" : c.state == CellState.One ? "1": "0";
 
             //set edges that exist
-
             if(leftEdge != null)
-                ChangeEdgeSymbol(leftEdge, c.Left.Constraint);
+                ChangeEdgeSymbol(leftEdge, c.Left.Constraint, false);
 
             if (upEdge != null)
-                ChangeEdgeSymbol(upEdge, c.Up.Constraint);
+                ChangeEdgeSymbol(upEdge, c.Up.Constraint, true);
         }
     }
 
-    void ChangeEdgeSymbol(GameObject edge, EdgeState state)
+    void ChangeEdgeSymbol(GameObject edge, EdgeState state, bool isVertical)
     {
-        //if the edge exists, but the text is "", write hide the gameobject
+        //if the text is "", hide the gameobject
         string text = state == EdgeState.X ? "X" : state == EdgeState.Equal ? "=" : "";
-        if(text == "")
+        edge.SetActive(text != "");
+        edge.transform.Find("Text").GetComponent<TextMesh>().text = text;
+
+        //if the edge is vertical and the text is X, rotate the text 90 degrees
+        if (isVertical && text == "X")
         {
-            edge.SetActive(false);
-            return;
-        }
-        else
-        {
-            edge.transform.Find("Text").GetComponent<TextMesh>().text = text;
+            edge.transform.Rotate(0, 90, 0);
         }
     }
 
