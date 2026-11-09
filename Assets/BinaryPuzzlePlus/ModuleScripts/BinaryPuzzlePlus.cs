@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BinaryPuzzlePlus : MonoBehaviour
@@ -82,6 +83,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
     /// </summary>
     private void ConfigurePuzzleGrid()
     {
+        const float scaleFactor = 1.18f;
         buttons = new List<Button>();
         leftEdges = new GameObject[size * size];
         upEdges = new GameObject[size * size];
@@ -100,8 +102,8 @@ public class BinaryPuzzlePlus : MonoBehaviour
         float currentWidh = buttonPrefab.GetComponent<Renderer>().bounds.size.x;
         float currentHeight = buttonPrefab.GetComponent<Renderer>().bounds.size.z;
 
-        float xScale = (desiredWidth * buttonPrefab.transform.localScale.x) / currentWidh * 1.18f;
-        float zScale = (desiredWidth * buttonPrefab.transform.localScale.z) / currentHeight * 1.18f;
+        float xScale = (desiredWidth * buttonPrefab.transform.localScale.x) / currentWidh * scaleFactor;
+        float zScale = (desiredWidth * buttonPrefab.transform.localScale.z) / currentHeight * scaleFactor;
 
         //Populate the grid with buttons starting from the starting position and moving across and down to the ending position
         for (int row = 0; row < size; row++)
@@ -130,31 +132,35 @@ public class BinaryPuzzlePlus : MonoBehaviour
             int row = ix / size;
             int col = ix % size;
 
-            //Make the edge appear above the button
-            const float yPosition = 0.02584f;
             if (col != 0)
             {
                 Button button = buttons[ix];
                 Button leftButton = buttons[ix - 1];
-                Vector3 edgePosition = Vector3.Lerp(leftButton.MeshRenderer.gameObject.transform.localPosition, button.MeshRenderer.gameObject.transform.localPosition, 0.5f);
-                edgePosition.y = yPosition;
-                GameObject edge = Instantiate(edgePrefab, transform);
-                edge.transform.localPosition = edgePosition;
-                leftEdges[ix] = edge;
+                leftEdges[ix] = GetNewEdge(leftButton, button, xScale, zScale, false);
             }
 
             if (row != 0)
             {
                 Button button = buttons[ix];
                 Button upButton = buttons[ix - size];
-                Vector3 edgePosition = Vector3.Lerp(upButton.MeshRenderer.gameObject.transform.localPosition, button.MeshRenderer.gameObject.transform.localPosition, 0.5f);
-                edgePosition.y = yPosition;
-                GameObject edge = Instantiate(edgePrefab, transform);
-                edge.transform.Rotate(0, 90, 0);
-                edge.transform.localPosition = edgePosition;
-                upEdges[ix] = edge;
+                upEdges[ix] = GetNewEdge(button, upButton, xScale, zScale, true);
             }
         }
+    }
+
+    GameObject GetNewEdge(Button b1, Button b2, float xScale, float zScale, bool isVertical)
+    {
+        //Make the edge appear above the button
+        const float yPosition = 0.02584f;
+        const float scaleFactor = .9f;
+
+        Vector3 edgePosition = Vector3.Lerp(b1.MeshRenderer.gameObject.transform.localPosition, b2.MeshRenderer.gameObject.transform.localPosition, 0.5f);
+        edgePosition.y = yPosition;
+        GameObject edge = Instantiate(edgePrefab, transform);
+        edge.transform.localPosition = edgePosition;
+        edge.transform.localScale = new Vector3(xScale * scaleFactor, edgePrefab.transform.localScale.y, zScale * scaleFactor);
+        if (isVertical) edge.transform.Rotate(0, 90, 0);
+        return edge;
     }
 
     /// <summary>
