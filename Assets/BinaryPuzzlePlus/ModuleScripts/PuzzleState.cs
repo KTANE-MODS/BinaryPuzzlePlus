@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 public class PuzzleState
@@ -17,6 +18,67 @@ public class PuzzleState
 
         CreateCells();
         CreateEdges();
+    }
+
+    public PuzzleState(PuzzleState original)
+    {
+        Size = original.Size;
+
+        // Clone cells
+        Cells = new Cell[original.Cells.Length];
+
+        for (int i = 0; i < original.Cells.Length; i++)
+        {
+            Cells[i] = new Cell
+            {
+                state = original.Cells[i].state
+            };
+        }
+
+        // Map original cells to their indices
+        Dictionary<Cell, int> cellIndices = new Dictionary<Cell, int>();
+
+        for (int i = 0; i < original.Cells.Length; i++)
+        {
+            cellIndices.Add(original.Cells[i], i);
+        }
+
+        // Clone edges
+        Edges = new List<Edge>();
+
+        foreach (Edge edge in original.Edges)
+        {
+            CopyEdge(
+                edge,
+                cellIndices[edge.CellA],
+                cellIndices[edge.CellB]
+            );
+        }
+    }
+
+    private void CopyEdge(Edge original, int indexA, int indexB)
+    {
+        Edge edge = new Edge
+        {
+            CellA = Cells[indexA],
+            CellB = Cells[indexB],
+            Constraint = original.Constraint
+        };
+
+        Edges.Add(edge);
+
+        bool horizontal = indexB == indexA + 1;
+
+        if (horizontal)
+        {
+            Cells[indexA].Right = edge;
+            Cells[indexB].Left = edge;
+        }
+        else
+        {
+            Cells[indexA].Down = edge;
+            Cells[indexB].Up = edge;
+        }
     }
 
     private void CreateCells()

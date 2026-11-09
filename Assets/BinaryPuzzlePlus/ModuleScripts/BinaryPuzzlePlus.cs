@@ -25,22 +25,12 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     [Header("Puzzle Settings")]
     [Range(6, 10)]
-    [Tooltip("The dimension of the puzzle. Must be between 6 and 10.")]
+    [Tooltip("The dimension of the puzzle. Must be between 6 and 10 and even.")]
     [SerializeField]
     private int size;
     [Tooltip("If rows/columns should be distinct from one another")]
     [SerializeField]
     private bool distinctRows;
-
-    [Tooltip("if true, cells and edges will be generated at the same time. If false, cells will be generated first and all possible edges will be placed after. Edges will be removed after generation based on the constraintRemovalPercentage variable.")]
-    [SerializeField]
-    private bool longGeneration;
-
-    [Tooltip("The chance of a constraint being removed when generating the puzzle. Only used if Long Generation is false.")]
-    [Range(0, 100)]
-    [SerializeField]
-    private int constraintRemovalPercentage;
-
 
     [Header("Button Materials")]
     [SerializeField]
@@ -51,6 +41,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
     private Material blueMaterial;
 
     private PuzzleState solution; //the generated solution to the puzzle
+    private PuzzleState givenPuzzle; //what the player is given to complete the puzzle
 
 
 
@@ -61,21 +52,19 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     void Start()
     {
-        PuzzleGenerator.LongGeneration = longGeneration;
         PuzzleGenerator.Size = size;
         PuzzleGenerator.DistinctRows = distinctRows;
-        PuzzleGenerator.ConstraintRemovalPercentage = constraintRemovalPercentage;
-        solution = PuzzleGenerator.GeneratePuzzle();
+        solution = PuzzleGenerator.GenerateSolution();
+        givenPuzzle = PuzzleGenerator.ReduceConstraints(solution);
         ConfigurePuzzleGrid();
-        UpdateVisuals(solution);
+        UpdateVisuals(givenPuzzle);
 
         Log("Puzzle Settings");
-        Log($"Long Generation: {longGeneration}");
         Log($"Size: {size}");
         Log($"Distinct Rows: {distinctRows}");
-        Log($"Constraint Removal Percentage: {constraintRemovalPercentage}");
 
         Log("Solution\n"+solution.ToString());
+        Log("Given\n" + givenPuzzle.ToString());
     }
 
     /// <summary>
@@ -209,12 +198,4 @@ public class BinaryPuzzlePlus : MonoBehaviour
     {
         Debug.Log($"[Binary Puzzle Plus #{ModuleId}] {message}");
     }
-
-
-
-
-
-
-
-
 }

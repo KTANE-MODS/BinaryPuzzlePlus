@@ -1,12 +1,14 @@
-﻿using System.Collections;
+﻿using HarmonyLib;
+using NUnit.Framework;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
+using static UnityEditor.Graphs.Styles;
 using Rnd = UnityEngine.Random;
-public static class PuzzleGenerator {
 
-    //if true, the generator will generate cells and edges at the same time. Othwerwise, it will generate them separatley.
-    public static bool LongGeneration = false;
+public static class PuzzleGenerator {
 
     //the width and length of the grid
     public static int Size;
@@ -14,26 +16,18 @@ public static class PuzzleGenerator {
     //If rows/columns should be distinct from one another
     public static bool DistinctRows;
 
-    //The chance of a constraint being removed when generating the puzzle. Used when LongGeneration is false. This is done after the solution is generated to reduce puzzle generation time. Used to vary the difficulty of the puzzle. 
-    public static int ConstraintRemovalPercentage;
-
     /// <summary>
     /// Generate the puzzle solution.
     /// </summary>
     /// <returns>The generated puzzle</returns>
-    public static PuzzleState GeneratePuzzle()
+    public static PuzzleState GenerateSolution()
     {
-        //if LongGeneration is false, Generate the cells first, then edges afterwards to reduce the time it takes to
-        //generate a puzzle. Otherwise, generate the cells and edges at the same time. This makes the space to
-        //search for a puzzle 2^(size*size) * 3^(2*r*c-r-c) before pruning. But it's a more authentic generation
-        //method since the constraints are added at the same time as the cells are generated.
+        //Generate the cells first, then edges afterwards.
         PuzzleState solution = new PuzzleState(Size);
 
         solution = GeneratePuzzleIndex(solution, new bool[Size * Size], new bool[Size * Size], new bool[Size * Size], 0).First();
-        if (!LongGeneration)
-        { 
-            AddConstraints(solution);
-        }
+        AddConstraints(solution);
+        ReduceConstraints(solution);
         return solution;
     }
 
@@ -110,81 +104,15 @@ public static class PuzzleGenerator {
         }
 
         //Randomize results if there are multiple valid options to ensure a different puzzles each time
-        valid = valid.Shuffle();
+        valid = GeneralExtensions.Shuffle(valid);
 
-        //Choose a value for the current cell (and edges) and recursively generate the rest of the puzzle
-        if (LongGeneration)
+        foreach (CellState v in valid)
         {
-            foreach (CellState v in valid)
+            if (!cellStateGiven[ix] || v == cells[ix].state)
             {
-                //See what possible edge constraints there are for the current cell
-                List<EdgeState> possibleLeftEdgeConstraints = new List<EdgeState>();
-                List<EdgeState> possibleUpEdgeConstraints = new List<EdgeState>();
-
-                if (cells[ix].Left != null)
-                {
-                    possibleLeftEdgeConstraints.Add(EdgeState.None);
-
-                    if (SatisfiesConstraint(v, cells[ix - 1].state, EdgeState.Equal))
-                        possibleLeftEdgeConstraints.Add(EdgeState.Equal);
-
-                    else
-                        possibleLeftEdgeConstraints.Add(EdgeState.X);
-                }
-
-                if (cells[ix].Up != null)
-                {
-                    possibleUpEdgeConstraints.Add(EdgeState.None);
-
-                    if (SatisfiesConstraint(v, cells[ix - size].state, EdgeState.Equal))
-                        possibleUpEdgeConstraints.Add(EdgeState.Equal);
-
-                    else
-                        possibleUpEdgeConstraints.Add(EdgeState.X);
-                }
-
-                //Randomize edge results if there are multiple valid options to ensure a different puzzles each time
-                possibleLeftEdgeConstraints = possibleLeftEdgeConstraints.Shuffle();
-                possibleUpEdgeConstraints = possibleUpEdgeConstraints.Shuffle();
-
-                if (!cellStateGiven[ix] || v == cells[ix].state)
-                {
-                    cells[ix].state = v;
-
-                    IEnumerable<EdgeState?> leftOptions = cells[ix].Left == null ? 
-                                                          new[] { (EdgeState?)null } : possibleLeftEdgeConstraints.Select(e => (EdgeState?)e);
-
-                    IEnumerable<EdgeState?> upOptions = cells[ix].Up == null ? 
-                                                        new[] { (EdgeState?)null } : possibleUpEdgeConstraints.Select(e => (EdgeState?)e);
-
-                    foreach (var left in leftOptions)
-                    {
-                        if (left.HasValue)
-                            cells[ix].Left.Constraint = left.Value;
-
-                        foreach (var up in upOptions)
-                        {
-                            if (up.HasValue)
-                                cells[ix].Up.Constraint = up.Value;
-
-                            foreach (var result in GeneratePuzzleIndex(current, cellStateGiven, leftEdgeGiven, upEdgeGiven, ix + 1))
-                                yield return result;
-                        }
-                    }
-                }
-            }
-        }
-
-        else
-        {
-            foreach (CellState v in valid)
-            {
-                if (!cellStateGiven[ix] || v == cells[ix].state)
-                {
-                    cells[ix].state = v;
-                    foreach (var result in GeneratePuzzleIndex(current, cellStateGiven, leftEdgeGiven, upEdgeGiven, ix + 1))
-                        yield return result;
-                }
+                cells[ix].state = v;
+                foreach (var result in GeneratePuzzleIndex(current, cellStateGiven, leftEdgeGiven, upEdgeGiven, ix + 1))
+                    yield return result;
             }
         }
     }
@@ -211,21 +139,19 @@ public static class PuzzleGenerator {
             case EdgeState.X:
                 return candidateState != neighborState;
             default:
-                return false;
-
+                throw new System.ArgumentOutOfRangeException(nameof(constraint), constraint, null);
         }
     }
 
+   
     /// <summary>
-    /// Adds constraints to the genreated solution. Removes a percentage of the constraints from the generated puzzle based on the constraintRemovalPercentage variable to vary the difficulty of the puzzle. This is done after the solution is generated to reduce puzzle generation time.
+    /// Adds constraints to the genreated solution.
     /// </summary>
     /// <param name="state"></param>
     private static void AddConstraints(PuzzleState state)
     {
         foreach (Edge nonEdge in state.Edges)
         {
-            if (Rnd.Range(0, 100) < ConstraintRemovalPercentage)
-                continue;
 
             if (nonEdge.CellA.state == nonEdge.CellB.state)
             {
@@ -237,5 +163,66 @@ public static class PuzzleGenerator {
                 nonEdge.Constraint = EdgeState.X;
             }
         }
+    }
+
+    /// <summary>
+    /// Reduces the constraints in the puzzle solution.
+    /// </summary>
+    /// <param name="solution">The puzzle state whose constraints are reduced.</param>
+    /// <returns>A boolean array indicating which constraints should be given (true) and which are removed (false).</returns>
+    public static PuzzleState ReduceConstraints(PuzzleState solution)
+    {
+        //Create a list of the constraints to figure out what should be given
+        int puzzleSize = Size * Size;
+
+        //The the amount of constraints to give, one for each cell, one for each left edge, and one for each up edge
+        int constraintSize = (int)Math.Pow(puzzleSize, 3);
+
+        //First size * size indicies are the cells, then the left edges, then the up edges
+        bool[] givenConstraints = Enumerable.Range(0, constraintSize).Select(_ => true).ToArray();
+
+        //figure out which what constraints to give
+        var puzzleIxs = Ut.ReduceRequiredSet(Ut.Shuffle(Enumerable.Range(0, constraintSize).ToArray()), test =>
+        {
+            for (var ix = 0; ix < constraintSize; ix++)
+                givenConstraints[ix] = false;
+            foreach (var ix in test.SetToTest)
+                givenConstraints[ix] = true;
+
+            //convert the given constraints into a puzzle state
+            bool[] givenCells = givenConstraints.Take(puzzleSize).ToArray();
+            bool[] givenLeftEdges = givenConstraints.Skip(puzzleSize).Take(puzzleSize).ToArray();
+            bool[] givenUpEdges = givenConstraints.Skip(puzzleSize * 2).Take(puzzleSize).ToArray();
+            return GeneratePuzzleIndex(solution, givenCells, givenLeftEdges, givenUpEdges, 0).Take(2).Count() == 1;
+        });
+
+
+        //Make a copy of the puzzle, and remove the constraints that are not given
+        PuzzleState puzzle = new PuzzleState(solution);
+
+        for(int i = 0; i < puzzleSize; i++)
+        {
+            int row = i / Size;
+            int col = i % Size;
+            //remove the cell
+            if (!givenConstraints[i])
+            {
+                puzzle.Cells[i].state = CellState.Empty;
+            }
+
+            //remove the left edge
+            if (col > 0 && !givenConstraints[puzzleSize + i])
+            {
+                puzzle.Cells[i].Left.Constraint = EdgeState.None;
+            }
+
+            //remove the up edge
+            if (row > 0 && !givenConstraints[(puzzleSize * 2) + i])
+            {
+                puzzle.Cells[i].Up.Constraint = EdgeState.None;
+            }
+        }
+
+        return puzzle;
     }
 }
