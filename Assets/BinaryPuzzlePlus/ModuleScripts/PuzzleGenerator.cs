@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using static UnityEditor.Graphs.Styles;
 using Rnd = UnityEngine.Random;
@@ -27,7 +28,6 @@ public static class PuzzleGenerator {
 
         solution = GeneratePuzzleIndex(solution, new bool[Size * Size], new bool[Size * Size], new bool[Size * Size], 0).First();
         AddConstraints(solution);
-        ReduceConstraints(solution);
         return solution;
     }
 
@@ -169,23 +169,23 @@ public static class PuzzleGenerator {
     /// Reduces the constraints in the puzzle solution.
     /// </summary>
     /// <param name="solution">The puzzle state whose constraints are reduced.</param>
-    /// <returns>A boolean array indicating which constraints should be given (true) and which are removed (false).</returns>
+    /// <returns>The </returns>
     public static PuzzleState ReduceConstraints(PuzzleState solution)
     {
+        //Make a copy of the solution to avoid modifying the original puzzle state
+        PuzzleState solutionClone = new PuzzleState(solution);
         //Create a list of the constraints to figure out what should be given
         int puzzleSize = Size * Size;
 
         //The the amount of constraints to give, one for each cell, one for each left edge, and one for each up edge
-        int constraintSize = (int)Math.Pow(puzzleSize, 3);
-
-        //First size * size indicies are the cells, then the left edges, then the up edges
-        bool[] givenConstraints = Enumerable.Range(0, constraintSize).Select(_ => true).ToArray();
+        int constraintSize = puzzleSize * 3;
 
         //figure out which what constraints to give
-        var puzzleIxs = Ut.ReduceRequiredSet(Ut.Shuffle(Enumerable.Range(0, constraintSize).ToArray()), test =>
+        int[] puzzleIxs = Ut.ReduceRequiredSet(Ut.Shuffle(Enumerable.Range(0, constraintSize).ToArray()), test =>
         {
-            for (var ix = 0; ix < constraintSize; ix++)
-                givenConstraints[ix] = false;
+            //First size * size indicies are the cells, then the left edges, then the up edges
+            bool[] givenConstraints = new bool[constraintSize];
+
             foreach (var ix in test.SetToTest)
                 givenConstraints[ix] = true;
 
@@ -193,36 +193,34 @@ public static class PuzzleGenerator {
             bool[] givenCells = givenConstraints.Take(puzzleSize).ToArray();
             bool[] givenLeftEdges = givenConstraints.Skip(puzzleSize).Take(puzzleSize).ToArray();
             bool[] givenUpEdges = givenConstraints.Skip(puzzleSize * 2).Take(puzzleSize).ToArray();
-            return GeneratePuzzleIndex(solution, givenCells, givenLeftEdges, givenUpEdges, 0).Take(2).Count() == 1;
-        });
+            return GeneratePuzzleIndex(solutionClone, givenCells, givenLeftEdges, givenUpEdges, 0).Take(2).Count() == 1;
+        }).ToArray();
 
 
         //Make a copy of the puzzle, and remove the constraints that are not given
-        PuzzleState puzzle = new PuzzleState(solution);
+        PuzzleState given = new PuzzleState(solution);
 
         for(int i = 0; i < puzzleSize; i++)
         {
             int row = i / Size;
             int col = i % Size;
             //remove the cell
-            if (!givenConstraints[i])
+            if (!puzzleIxs.Contains(i))
             {
-                puzzle.Cells[i].state = CellState.Empty;
+                given.Cells[i].state = CellState.Empty;
             }
-
             //remove the left edge
-            if (col > 0 && !givenConstraints[puzzleSize + i])
+            if (col > 0 && !puzzleIxs.Contains(puzzleSize + i))
             {
-                puzzle.Cells[i].Left.Constraint = EdgeState.None;
+                given.Cells[i].Left.Constraint = EdgeState.None;
             }
-
             //remove the up edge
-            if (row > 0 && !givenConstraints[(puzzleSize * 2) + i])
+            if (row > 0 && !puzzleIxs.Contains((puzzleSize * 2) + i))
             {
-                puzzle.Cells[i].Up.Constraint = EdgeState.None;
+                given.Cells[i].Up.Constraint = EdgeState.None;
             }
         }
 
-        return puzzle;
+        return given;
     }
 }
