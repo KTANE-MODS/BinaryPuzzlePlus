@@ -74,14 +74,17 @@ public static class PuzzleGenerator {
         if (y - zeros == size / 2)
             valid.Remove(CellState.One);
 
-        //Check if there is a contraint edge and verify it is satisfied
+
+        //Check if the current cell satisfies the constraints with its neighbors, only if the left/up edge is given, otherwise the constraint is satisfied
         valid.RemoveAll(v =>
         {
-            if (cells[ix].Left != null &&
+            //if the left edge is given, only use that edge state
+            if (cells[ix].Left != null && leftEdgeGiven[ix] &&
                 !SatisfiesConstraint(v, cells[ix - 1].state, cells[ix].Left.Constraint))
                 return true;
 
-            if (cells[ix].Up != null &&
+            //if the up edge is given, only use that edge state
+            if (cells[ix].Up != null && upEdgeGiven[ix] &&
                 !SatisfiesConstraint(v, cells[ix - size].state, cells[ix].Up.Constraint))
                 return true;
 
@@ -172,17 +175,20 @@ public static class PuzzleGenerator {
     /// <returns>The </returns>
     public static PuzzleState ReduceConstraints(PuzzleState solution)
     {
-        //Make a copy of the solution to avoid modifying the original puzzle state
-        PuzzleState solutionClone = new PuzzleState(solution);
+        
         //Create a list of the constraints to figure out what should be given
         int puzzleSize = Size * Size;
 
         //The the amount of constraints to give, one for each cell, one for each left edge, and one for each up edge
         int constraintSize = puzzleSize * 3;
 
+        
         //figure out which what constraints to give
         int[] puzzleIxs = Ut.ReduceRequiredSet(Ut.Shuffle(Enumerable.Range(0, constraintSize).ToArray()), test =>
         {
+            //Make a copy of the solution to avoid modifying the original puzzle state
+            PuzzleState solutionClone = new PuzzleState(solution);
+
             //First size * size indicies are the cells, then the left edges, then the up edges
             bool[] givenConstraints = new bool[constraintSize];
 

@@ -57,7 +57,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
         solution = PuzzleGenerator.GenerateSolution();
         givenPuzzle = PuzzleGenerator.ReduceConstraints(solution);
         ConfigurePuzzleGrid();
-        UpdateVisuals(solution);
+        UpdateVisuals(givenPuzzle);
 
         Log("Puzzle Settings");
         Log($"Size: {size}");
