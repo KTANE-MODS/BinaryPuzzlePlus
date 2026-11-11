@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4142798818086226}
   - component: {fileID: 23150992764866850}
   - component: {fileID: 102094185625455982}
+  - component: {fileID: 114639034952721212}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -39,6 +40,7 @@ GameObject:
   - component: {fileID: 33453744443507040}
   - component: {fileID: 114165876151463852}
   - component: {fileID: 23831942367511660}
+  - component: {fileID: 114370337960894188}
   m_Layer: 0
   m_Name: Highlight
   m_TagString: Untagged
@@ -57,6 +59,7 @@ GameObject:
   - component: {fileID: 33849242323046234}
   - component: {fileID: 23254714349664454}
   - component: {fileID: 114346303719036682}
+  - component: {fileID: 114981400920397896}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -277,3 +280,42 @@ MonoBehaviour:
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
   ForceInteractionHighlight: 0
+--- !u!114 &114370337960894188
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1685865274953760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Outline
+--- !u!114 &114639034952721212
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1370491382846406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - GUI/KT 3D Text Diffuse
+--- !u!114 &114981400920397896
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1846257432158418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint

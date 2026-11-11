@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using Newtonsoft.Json;
+using System;
 
 public class BinaryPuzzlePlus : MonoBehaviour
 {
@@ -46,6 +46,31 @@ public class BinaryPuzzlePlus : MonoBehaviour
     [SerializeField]
     private Material blueMaterial;
 
+    KMModSettings KMSettings;
+
+    #region Mod Settings
+    BinaryPuzzlePlusSettings modSettings;
+
+    static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[] {
+        new Dictionary<string, object> {
+             { "Filename", "BinaryPuzzlePlus.json" },
+             { "Name", "Binary Puzzle Plus Settings" },
+             { "Listing", new List<Dictionary<string, object>>{
+                    new Dictionary<string, object> {
+                         { "Key", "Size" },
+                         { "Text", "The row/column size of the puzzle. Valid values are 6, 8, and 10. Default is 6." }
+                    },
+                    new Dictionary<string, object> {
+                         { "Key", "DistinctRows" },
+                         { "Text", "If true, the puzzle will enforce a rule where row/columns must be distinct. Default is false." }
+                    }
+             } }
+        }
+    };
+
+    #endregion
+
+
     private PuzzleState solution; //the generated solution to the puzzle
     private PuzzleState givenPuzzle; //what the player is given to complete the puzzle
 
@@ -53,12 +78,13 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     private bool moduleSolved = false;
 
-
-
     void Awake()
     {
         ModuleId = ModuleIdCounter++;
         Module = GetComponent<KMBombModule>();
+        resetButton.GetComponent<MeshRenderer>().sharedMaterial = yellowMaterial;
+        KMSettings = GetComponent<KMModSettings>();
+        ConfigureModSettings();
     }
 
     void Start()
@@ -106,6 +132,35 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
         Log("Solution\n" + solution.ToString());
         Log("Given\n" + givenPuzzle.ToString());
+    }
+
+private void ConfigureModSettings()
+{
+        var modConfig = new ModConfig<BinaryPuzzlePlusSettings>("BinaryPuzzlePlusSettings");
+        var defaultSetings = new BinaryPuzzlePlusSettings();
+
+
+        modSettings = modConfig.Settings;
+        //modConfig.Settings = modSettings;
+
+        Log($"Given mod settings\nSize: {modSettings.Size}\nDistinctRows: {modSettings.DistinctRows}");
+
+
+
+        //Validate the values
+        if (modSettings.Size % 2 != 0 || (modSettings.Size < 6 && modSettings.Size > 10))
+        {
+            Log($"Invalid mod setting size. Recieved: {modSettings.Size}. Using default value of {defaultSetings.Size}");
+            size = defaultSetings.Size;
+        }
+
+        else
+        {
+            size = modConfig.Settings.Size;
+        }
+        size = 10;
+
+        distinctRows = modConfig.Settings.DistinctRows;
     }
 
     /// <summary>
@@ -264,12 +319,15 @@ public class BinaryPuzzlePlus : MonoBehaviour
     {
         Log("Puzzle Solved");
         Module.HandlePass();
+        resetButton.transform.Find("Label").GetComponent<TextMesh>().text = "SOLVED";
         moduleSolved = true;
-        UpdateVisuals(currentState); //just in case
+        UpdateVisuals(currentState);
     }
 
     private void Log(string message)
     {
         Debug.Log($"[Binary Puzzle Plus #{ModuleId}] {message}");
     }
+
+    
 }

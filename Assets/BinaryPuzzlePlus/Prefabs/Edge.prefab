@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33850696030907236}
   - component: {fileID: 136482937945738248}
   - component: {fileID: 23866829122582080}
+  - component: {fileID: 114991280162196378}
   m_Layer: 0
   m_Name: Edge
   m_TagString: Untagged
@@ -38,6 +39,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4044591090407648}
   - component: {fileID: 212437761239436896}
+  - component: {fileID: 114837673003843874}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -113,6 +115,32 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1532209651888066}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &114837673003843874
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1903201344470710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - Sprites/Default
+--- !u!114 &114991280162196378
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1532209651888066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - Standard
 --- !u!136 &136482937945738248
 CapsuleCollider:
   m_ObjectHideFlags: 1

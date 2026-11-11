@@ -60,6 +60,7 @@ GameObject:
   - component: {fileID: 33885385016194340}
   - component: {fileID: 23832812395254498}
   - component: {fileID: 114995766900467520}
+  - component: {fileID: 114604875623661768}
   m_Layer: 0
   m_Name: Reset Button
   m_TagString: Untagged
@@ -94,6 +95,7 @@ GameObject:
   - component: {fileID: 4633793547886946}
   - component: {fileID: 23200497957100096}
   - component: {fileID: 102387831199479620}
+  - component: {fileID: 114465161851089240}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -112,6 +114,7 @@ GameObject:
   - component: {fileID: 33734355568068210}
   - component: {fileID: 23007223309289702}
   - component: {fileID: 114201571617698530}
+  - component: {fileID: 114902789227444842}
   m_Layer: 0
   m_Name: Highlight
   m_TagString: Untagged
@@ -541,6 +544,32 @@ MonoBehaviour:
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
   ForceInteractionHighlight: 0
+--- !u!114 &114465161851089240
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1629536851214818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - GUI/KT 3D Text Diffuse
+--- !u!114 &114604875623661768
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1277617486442562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
 --- !u!114 &114662811612611870
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -566,17 +595,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17787df24b2c65a42acf324cb32bda4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  XSprite: {fileID: 0}
+  EqualSprite: {fileID: 0}
   buttonPrefab: {fileID: 1846257432158418, guid: 179262fdc3802b24f914d9bb748cdb15,
     type: 2}
   edgePrefab: {fileID: 1532209651888066, guid: 1cd8049c65c1d344e9683718bfe48d7c, type: 2}
   resetButton: {fileID: 114995766900467520}
   size: 6
   distinctRows: 0
-  longGeneration: 0
-  constraintRemovalPercentage: 75
   defaultMaterial: {fileID: 2100000, guid: 8b7f362ea710e31438ef02dd136bbd49, type: 2}
   yellowMaterial: {fileID: 2100000, guid: 420628c2a383e894684378fb464058cb, type: 2}
   blueMaterial: {fileID: 2100000, guid: 38e80221f00907d46b121a6447f52e9e, type: 2}
+--- !u!114 &114902789227444842
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1766296366206246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
 --- !u!114 &114995766900467520
 MonoBehaviour:
   m_ObjectHideFlags: 1
