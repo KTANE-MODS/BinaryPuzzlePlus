@@ -2,9 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BinaryPuzzlePlus : MonoBehaviour
 {
+    [SerializeField]
+    private Sprite XSprite;
+    [SerializeField]
+    private Sprite EqualSprite;
 
     [SerializeField]
     private GameObject buttonPrefab;
@@ -185,7 +190,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
         GameObject edge = Instantiate(edgePrefab, transform);
         edge.transform.localPosition = edgePosition;
         edge.transform.localScale = new Vector3(xScale * scaleFactor, edgePrefab.transform.localScale.y, zScale * scaleFactor);
-        if (isVertical) edge.transform.Rotate(0, 90, 0);
+        if(isVertical) edge.transform.Rotate(0, 90, 0);
         return edge;
     }
 
@@ -219,17 +224,14 @@ public class BinaryPuzzlePlus : MonoBehaviour
     void ChangeEdgeSymbol(GameObject edge, EdgeState state, bool isVertical)
     {
         //if the text is "", hide the gameobject
-        string text = state == EdgeState.X ? "X" : state == EdgeState.Equal ? "=" : "";
-        edge.SetActive(text != "");
-        edge.transform.Find("Text").GetComponent<TextMesh>().text = text;
-
-        //if the edge is vertical and the text is X, rotate the text 90 degrees
-        if (isVertical && text == "X")
+        if (state == EdgeState.None)
         {
-            edge.transform.Rotate(0, 90, 0);
+            edge.SetActive(false);
+            return;
         }
-    }
 
+        edge.transform.Find("Sprite").GetComponent<SpriteRenderer>().sprite = state == EdgeState.Equal ? EqualSprite : XSprite;
+    }
     private void ButtonPress(Button button)
     {
         //if the cell is given, don't do anything
