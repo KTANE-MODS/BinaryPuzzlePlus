@@ -46,8 +46,6 @@ public class BinaryPuzzlePlus : MonoBehaviour
     [SerializeField]
     private Material blueMaterial;
 
-    KMModSettings KMSettings;
-
     #region Mod Settings
     BinaryPuzzlePlusSettings modSettings;
 
@@ -83,7 +81,6 @@ public class BinaryPuzzlePlus : MonoBehaviour
         ModuleId = ModuleIdCounter++;
         Module = GetComponent<KMBombModule>();
         resetButton.GetComponent<MeshRenderer>().sharedMaterial = yellowMaterial;
-        KMSettings = GetComponent<KMModSettings>();
         ConfigureModSettings();
     }
 
@@ -139,13 +136,10 @@ private void ConfigureModSettings()
         var modConfig = new ModConfig<BinaryPuzzlePlusSettings>("BinaryPuzzlePlusSettings");
         var defaultSetings = new BinaryPuzzlePlusSettings();
 
-
         modSettings = modConfig.Settings;
         //modConfig.Settings = modSettings;
 
         Log($"Given mod settings\nSize: {modSettings.Size}\nDistinctRows: {modSettings.DistinctRows}");
-
-
 
         //Validate the values
         if (modSettings.Size % 2 != 0 || (modSettings.Size < 6 && modSettings.Size > 10))
@@ -158,7 +152,6 @@ private void ConfigureModSettings()
         {
             size = modConfig.Settings.Size;
         }
-        size = 10;
 
         distinctRows = modConfig.Settings.DistinctRows;
     }
