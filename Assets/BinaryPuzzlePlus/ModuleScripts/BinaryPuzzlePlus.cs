@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BinaryPuzzlePlus : MonoBehaviour
@@ -43,11 +44,16 @@ public class BinaryPuzzlePlus : MonoBehaviour
     private PuzzleState solution; //the generated solution to the puzzle
     private PuzzleState givenPuzzle; //what the player is given to complete the puzzle
 
+    private PuzzleState currentState;
+
+    private bool moduleSolved = false;
+
 
 
     void Awake()
     {
         ModuleId = ModuleIdCounter++;
+        Module = GetComponent<KMBombModule>();
     }
 
     void Start()
@@ -56,14 +62,44 @@ public class BinaryPuzzlePlus : MonoBehaviour
         PuzzleGenerator.DistinctRows = distinctRows;
         solution = PuzzleGenerator.GenerateSolution();
         givenPuzzle = PuzzleGenerator.ReduceConstraints(solution);
+
+        //todo change the solution so it shows the same edges as the given puzzle
+        for (int i = 0; i < size * size; i++)
+        {
+            if (givenPuzzle.Cells[i].Left != null)
+                solution.Cells[i].Left.Constraint = givenPuzzle.Cells[i].Left.Constraint;
+            if (givenPuzzle.Cells[i].Up != null)
+                solution.Cells[i].Up.Constraint = givenPuzzle.Cells[i].Up.Constraint;
+        }
+
         ConfigurePuzzleGrid();
-        UpdateVisuals(givenPuzzle);
+
+        currentState = new PuzzleState(givenPuzzle);
+        buttons.ForEach(b => b.Cell = currentState.Cells[buttons.IndexOf(b)]);
+
+        UpdateVisuals(currentState);
+
+        //Make the button interactable
+        KMSelectable parent = GetComponent<KMSelectable>();
+        foreach (var button in buttons)
+        {
+            button.Selectable.Parent = parent;
+
+            button.Selectable.OnInteract += delegate ()
+            {
+                ButtonPress(button);
+                return false;
+            };
+        }
+
+        parent.Children = parent.Children.Concat(buttons.Select(b => b.Selectable)).ToArray();
+        parent.UpdateChildrenProperly();
 
         Log("Puzzle Settings");
         Log($"Size: {size}");
         Log($"Distinct Rows: {distinctRows}");
 
-        Log("Solution\n"+solution.ToString());
+        Log("Solution\n" + solution.ToString());
         Log("Given\n" + givenPuzzle.ToString());
     }
 
@@ -159,7 +195,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
     void UpdateVisuals(PuzzleState state)
     {
         for (int ix = 0; ix < size * size; ix++)
-        { 
+        {
             Cell c = state.Cells[ix];
             Button b = buttons[ix];
             GameObject leftEdge = leftEdges[ix];
@@ -169,10 +205,10 @@ public class BinaryPuzzlePlus : MonoBehaviour
             b.MeshRenderer.sharedMaterial = c.state == CellState.Empty ? defaultMaterial : c.state == CellState.One ? yellowMaterial : blueMaterial;
 
             //change the text
-            b.Label.text = c.state == CellState.Empty ? "" : c.state == CellState.One ? "1": "0";
+            b.Label.text = c.state == CellState.Empty ? "" : c.state == CellState.One ? "1" : "0";
 
             //set edges that exist
-            if(leftEdge != null)
+            if (leftEdge != null)
                 ChangeEdgeSymbol(leftEdge, c.Left.Constraint, false);
 
             if (upEdge != null)
@@ -192,6 +228,42 @@ public class BinaryPuzzlePlus : MonoBehaviour
         {
             edge.transform.Rotate(0, 90, 0);
         }
+    }
+
+    private void ButtonPress(Button button)
+    {
+        //if the cell is given, don't do anything
+        if (moduleSolved || givenPuzzle.Cells[buttons.IndexOf(button)].state != CellState.Empty)
+            return;
+
+        //cycle through the states
+        button.Cell.state = (CellState)(((int)button.Cell.state + 1) % 3);
+        currentState.Cells[buttons.IndexOf(button)].state = button.Cell.state;
+        UpdateVisuals(currentState);
+
+        //Check if the puzzle is solved
+        if (Solved())
+        {
+            Solve();
+        }
+    }
+
+    private bool Solved()
+    {
+        for (int i = 0; i < size * size; i++)
+        {
+            if (currentState.Cells[i].state != solution.Cells[i].state)
+                return false;
+        }
+        return true;
+    }
+
+    private void Solve()
+    {
+        Log("Puzzle Solved");
+        Module.HandlePass();
+        moduleSolved = true;
+        UpdateVisuals(currentState); //just in case
     }
 
     private void Log(string message)
