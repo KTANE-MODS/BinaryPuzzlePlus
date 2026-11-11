@@ -52,7 +52,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
     static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[] {
         new Dictionary<string, object> {
              { "Filename", "BinaryPuzzlePlus.json" },
-             { "Name", "Binary Puzzle Plus Settings" },
+             { "Name", "BinaryPuzzlePlusSettings" },
              { "Listing", new List<Dictionary<string, object>>{
                     new Dictionary<string, object> {
                          { "Key", "Size" },
