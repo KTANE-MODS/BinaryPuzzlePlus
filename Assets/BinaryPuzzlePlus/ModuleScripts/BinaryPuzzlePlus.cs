@@ -22,10 +22,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
     private GameObject[] upEdges;
 
     private List<Button> buttons;
-
-    private KMBombInfo Bomb;
     private KMBombModule Module;
-    private KMAudio Audio;
     private static int ModuleIdCounter = 1;
     private int ModuleId;
 
@@ -78,40 +75,69 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log(1);
         ModuleId = ModuleIdCounter++;
+        Debug.Log(2);
         Module = GetComponent<KMBombModule>();
+        Debug.Log(3);
         resetButton.GetComponent<MeshRenderer>().sharedMaterial = yellowMaterial;
+        Debug.Log(4);
         ConfigureModSettings();
+        Debug.Log(5);
     }
 
     void Start()
     {
+        Debug.Log(6);
         PuzzleGenerator.Size = size;
+        Debug.Log(7);
         PuzzleGenerator.DistinctRows = distinctRows;
+        Debug.Log(8);
         solution = PuzzleGenerator.GenerateSolution();
+        Debug.Log(9);
         givenPuzzle = PuzzleGenerator.ReduceConstraints(solution);
+        Debug.Log(10);
 
         //todo change the solution so it shows the same edges as the given puzzle
         for (int i = 0; i < size * size; i++)
         {
+            Debug.Log(11);
             if (givenPuzzle.Cells[i].Left != null)
+            { 
                 solution.Cells[i].Left.Constraint = givenPuzzle.Cells[i].Left.Constraint;
+                Debug.Log(12);
+            }
             if (givenPuzzle.Cells[i].Up != null)
+            { 
                 solution.Cells[i].Up.Constraint = givenPuzzle.Cells[i].Up.Constraint;
+                Debug.Log(13);
+            }
+            Debug.Log(14);
         }
 
+        Debug.Log(15);
         ConfigurePuzzleGrid();
+        Debug.Log(16);
 
         currentState = new PuzzleState(givenPuzzle);
+        Debug.Log(17);
+
         buttons.ForEach(b => b.Cell = currentState.Cells[buttons.IndexOf(b)]);
+        Debug.Log(18);
+
 
         UpdateVisuals(currentState);
+        Debug.Log(19);
 
         //Make the button interactable
         KMSelectable parent = GetComponent<KMSelectable>();
+        Debug.Log(20);
+
         foreach (var button in buttons)
         {
+            Debug.Log(22);
             button.Selectable.Parent = parent;
+            Debug.Log(23);
 
             button.Selectable.OnInteract += delegate ()
             {
@@ -120,13 +146,15 @@ public class BinaryPuzzlePlus : MonoBehaviour
             };
         }
 
+        Debug.Log(24);
         parent.Children = parent.Children.Concat(buttons.Select(b => b.Selectable)).ToArray();
+        Debug.Log(25);
         parent.UpdateChildrenProperly();
+        Debug.Log(26);
 
         Log("Puzzle Settings");
         Log($"Size: {size}");
         Log($"Distinct Rows: {distinctRows}");
-
         Log("Solution\n" + solution.ToString());
         Log("Given\n" + givenPuzzle.ToString());
     }
@@ -134,11 +162,14 @@ public class BinaryPuzzlePlus : MonoBehaviour
 private void ConfigureModSettings()
 {
         var modConfig = new ModConfig<BinaryPuzzlePlusSettings>("BinaryPuzzlePlusSettings");
+        Debug.Log(27);
         var defaultSetings = new BinaryPuzzlePlusSettings();
+        Debug.Log(28);
 
         modSettings = modConfig.Settings;
-        //modConfig.Settings = modSettings;
-
+        Debug.Log(29);
+        modConfig.Settings = modSettings;
+        Debug.Log(30);
         Log($"Given mod settings\nSize: {modSettings.Size}\nDistinctRows: {modSettings.DistinctRows}");
 
         //Validate the values
@@ -150,10 +181,12 @@ private void ConfigureModSettings()
 
         else
         {
+            Debug.Log(31);
             size = modConfig.Settings.Size;
         }
 
         distinctRows = modConfig.Settings.DistinctRows;
+        Debug.Log(32);
     }
 
     /// <summary>
@@ -247,25 +280,39 @@ private void ConfigureModSettings()
     /// </summary>
     void UpdateVisuals(PuzzleState state)
     {
+        Debug.Log(33);
         for (int ix = 0; ix < size * size; ix++)
         {
+
             Cell c = state.Cells[ix];
+            Debug.Log(34); 
             Button b = buttons[ix];
+            Debug.Log(35);
             GameObject leftEdge = leftEdges[ix];
+            Debug.Log(36);
             GameObject upEdge = upEdges[ix];
+            Debug.Log(37);
 
             //change the background color
             b.MeshRenderer.sharedMaterial = c.state == CellState.Empty ? defaultMaterial : c.state == CellState.One ? yellowMaterial : blueMaterial;
+            Debug.Log(38);
 
             //change the text
             b.Label.text = c.state == CellState.Empty ? "" : c.state == CellState.One ? "1" : "0";
+            Debug.Log(39);
 
             //set edges that exist
             if (leftEdge != null)
+            { 
                 ChangeEdgeSymbol(leftEdge, c.Left.Constraint, false);
+                Debug.Log(40);
+            }
 
             if (upEdge != null)
+            {
                 ChangeEdgeSymbol(upEdge, c.Up.Constraint, true);
+                Debug.Log(41);
+            }
         }
     }
 
