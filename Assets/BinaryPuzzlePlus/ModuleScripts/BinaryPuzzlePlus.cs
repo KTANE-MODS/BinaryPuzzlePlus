@@ -17,6 +17,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
     private GameObject edgePrefab;
     [SerializeField]
     private KMSelectable resetButton;
+    private MeshRenderer resetButtonMeshRender;
 
     private GameObject[] leftEdges;
     private GameObject[] upEdges;
@@ -80,10 +81,17 @@ public class BinaryPuzzlePlus : MonoBehaviour
         Debug.Log(2);
         Module = GetComponent<KMBombModule>();
         Debug.Log(3);
-        resetButton.GetComponent<MeshRenderer>().sharedMaterial = yellowMaterial;
+        resetButtonMeshRender = resetButton.GetComponent<MeshRenderer>();
+        resetButtonMeshRender.sharedMaterial = yellowMaterial;
         Debug.Log(4);
         ConfigureModSettings();
         Debug.Log(5);
+
+        resetButton.OnInteract += delegate ()
+        {
+            ResetGrid();
+            return false;
+        };
     }
 
     void Start()
@@ -103,12 +111,12 @@ public class BinaryPuzzlePlus : MonoBehaviour
         {
             Debug.Log(11);
             if (givenPuzzle.Cells[i].Left != null)
-            { 
+            {
                 solution.Cells[i].Left.Constraint = givenPuzzle.Cells[i].Left.Constraint;
                 Debug.Log(12);
             }
             if (givenPuzzle.Cells[i].Up != null)
-            { 
+            {
                 solution.Cells[i].Up.Constraint = givenPuzzle.Cells[i].Up.Constraint;
                 Debug.Log(13);
             }
@@ -119,15 +127,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
         ConfigurePuzzleGrid();
         Debug.Log(16);
 
-        currentState = new PuzzleState(givenPuzzle);
-        Debug.Log(17);
-
-        buttons.ForEach(b => b.Cell = currentState.Cells[buttons.IndexOf(b)]);
-        Debug.Log(18);
-
-
-        UpdateVisuals(currentState);
-        Debug.Log(19);
+        ResetGrid();
 
         //Make the button interactable
         KMSelectable parent = GetComponent<KMSelectable>();
@@ -159,8 +159,8 @@ public class BinaryPuzzlePlus : MonoBehaviour
         Log("Given\n" + givenPuzzle.ToString());
     }
 
-private void ConfigureModSettings()
-{
+    private void ConfigureModSettings()
+    {
         var modConfig = new ModConfig<BinaryPuzzlePlusSettings>("BinaryPuzzlePlusSettings");
         Debug.Log(27);
         var defaultSetings = new BinaryPuzzlePlusSettings();
@@ -271,7 +271,7 @@ private void ConfigureModSettings()
         GameObject edge = Instantiate(edgePrefab, transform);
         edge.transform.localPosition = edgePosition;
         edge.transform.localScale = new Vector3(xScale * scaleFactor, edgePrefab.transform.localScale.y, zScale * scaleFactor);
-        if(isVertical) edge.transform.Rotate(0, 90, 0);
+        if (isVertical) edge.transform.Rotate(0, 90, 0);
         return edge;
     }
 
@@ -285,7 +285,7 @@ private void ConfigureModSettings()
         {
 
             Cell c = state.Cells[ix];
-            Debug.Log(34); 
+            Debug.Log(34);
             Button b = buttons[ix];
             Debug.Log(35);
             GameObject leftEdge = leftEdges[ix];
@@ -303,20 +303,20 @@ private void ConfigureModSettings()
 
             //set edges that exist
             if (leftEdge != null)
-            { 
-                ChangeEdgeSymbol(leftEdge, c.Left.Constraint, false);
+            {
+                ChangeEdgeSymbol(leftEdge, c.Left.Constraint);
                 Debug.Log(40);
             }
 
             if (upEdge != null)
             {
-                ChangeEdgeSymbol(upEdge, c.Up.Constraint, true);
+                ChangeEdgeSymbol(upEdge, c.Up.Constraint);
                 Debug.Log(41);
             }
         }
     }
 
-    void ChangeEdgeSymbol(GameObject edge, EdgeState state, bool isVertical)
+    void ChangeEdgeSymbol(GameObject edge, EdgeState state)
     {
         //if the text is "", hide the gameobject
         if (state == EdgeState.None)
@@ -327,6 +327,7 @@ private void ConfigureModSettings()
 
         edge.transform.Find("Sprite").GetComponent<SpriteRenderer>().sprite = state == EdgeState.Equal ? EqualSprite : XSprite;
     }
+
     private void ButtonPress(Button button)
     {
         //if the cell is given, don't do anything
@@ -339,13 +340,20 @@ private void ConfigureModSettings()
         UpdateVisuals(currentState);
 
         //Check if the puzzle is solved
-        if (Solved())
+        if (IsSolved())
         {
             Solve();
         }
     }
 
-    private bool Solved()
+    private void ResetGrid()
+    {
+        currentState = new PuzzleState(givenPuzzle);
+        buttons.ForEach(b => b.Cell = currentState.Cells[buttons.IndexOf(b)]);
+        UpdateVisuals(currentState);
+    }
+
+    private bool IsSolved()
     {
         for (int i = 0; i < size * size; i++)
         {
@@ -360,6 +368,7 @@ private void ConfigureModSettings()
         Log("Puzzle Solved");
         Module.HandlePass();
         resetButton.transform.Find("Label").GetComponent<TextMesh>().text = "SOLVED";
+        resetButtonMeshRender.sharedMaterial = blueMaterial;
         moduleSolved = true;
         UpdateVisuals(currentState);
     }
