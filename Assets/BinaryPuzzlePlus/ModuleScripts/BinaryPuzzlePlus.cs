@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Newtonsoft.Json;
-using System;
 
 public class BinaryPuzzlePlus : MonoBehaviour
 {
@@ -18,10 +16,6 @@ public class BinaryPuzzlePlus : MonoBehaviour
     [SerializeField]
     private KMSelectable resetButton;
     private MeshRenderer resetButtonMeshRender;
-
-    private GameObject[] leftEdges;
-    private GameObject[] upEdges;
-
     private List<Button> buttons;
     private KMBombModule Module;
     private static int ModuleIdCounter = 1;
@@ -58,7 +52,7 @@ public class BinaryPuzzlePlus : MonoBehaviour
                     },
                     new Dictionary<string, object> {
                          { "Key", "DistinctRows" },
-                         { "Text", "If true, the puzzle will enforce a rule where row/columns must be distinct. Default is false." }
+                         { "Text", "If true, the puzzle will enforce a rule where row/columns must be distinct. Default is true." }
                     }
              } }
         }
@@ -76,17 +70,16 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     void Awake()
     {
-        Debug.Log(1);
         ModuleId = ModuleIdCounter++;
-        Debug.Log(2);
+        
         Module = GetComponent<KMBombModule>();
-        Debug.Log(3);
+        
         resetButtonMeshRender = resetButton.GetComponent<MeshRenderer>();
         resetButtonMeshRender.sharedMaterial = yellowMaterial;
-        Debug.Log(4);
+        
         ConfigureModSettings();
-        Debug.Log(5);
 
+        resetButton.AddInteractionPunch(.1f);
         resetButton.OnInteract += delegate ()
         {
             ResetGrid();
@@ -96,49 +89,43 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     void Start()
     {
-        Debug.Log(6);
         PuzzleGenerator.Size = size;
-        Debug.Log(7);
         PuzzleGenerator.DistinctRows = distinctRows;
-        Debug.Log(8);
         solution = PuzzleGenerator.GenerateSolution();
-        Debug.Log(9);
         givenPuzzle = PuzzleGenerator.ReduceConstraints(solution);
-        Debug.Log(10);
 
         //todo change the solution so it shows the same edges as the given puzzle
         for (int i = 0; i < size * size; i++)
         {
-            Debug.Log(11);
             if (givenPuzzle.Cells[i].Left != null)
             {
                 solution.Cells[i].Left.Constraint = givenPuzzle.Cells[i].Left.Constraint;
-                Debug.Log(12);
+                
             }
             if (givenPuzzle.Cells[i].Up != null)
             {
                 solution.Cells[i].Up.Constraint = givenPuzzle.Cells[i].Up.Constraint;
-                Debug.Log(13);
+                
             }
-            Debug.Log(14);
+            
         }
 
-        Debug.Log(15);
+        
         ConfigurePuzzleGrid();
-        Debug.Log(16);
-
         ResetGrid();
+
 
         //Make the button interactable
         KMSelectable parent = GetComponent<KMSelectable>();
-        Debug.Log(20);
+        
 
         foreach (var button in buttons)
         {
-            Debug.Log(22);
+            
             button.Selectable.Parent = parent;
-            Debug.Log(23);
+            
 
+            button.Selectable.AddInteractionPunch(.1f);
             button.Selectable.OnInteract += delegate ()
             {
                 ButtonPress(button);
@@ -146,11 +133,9 @@ public class BinaryPuzzlePlus : MonoBehaviour
             };
         }
 
-        Debug.Log(24);
         parent.Children = parent.Children.Concat(buttons.Select(b => b.Selectable)).ToArray();
-        Debug.Log(25);
         parent.UpdateChildrenProperly();
-        Debug.Log(26);
+        
 
         Log("Puzzle Settings");
         Log($"Size: {size}");
@@ -162,14 +147,14 @@ public class BinaryPuzzlePlus : MonoBehaviour
     private void ConfigureModSettings()
     {
         var modConfig = new ModConfig<BinaryPuzzlePlusSettings>("BinaryPuzzlePlusSettings");
-        Debug.Log(27);
+        
         var defaultSetings = new BinaryPuzzlePlusSettings();
-        Debug.Log(28);
+        
 
         modSettings = modConfig.Settings;
-        Debug.Log(29);
+        
         modConfig.Settings = modSettings;
-        Debug.Log(30);
+        
         Log($"Given mod settings\nSize: {modSettings.Size}\nDistinctRows: {modSettings.DistinctRows}");
 
         //Validate the values
@@ -181,12 +166,12 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
         else
         {
-            Debug.Log(31);
+            
             size = modConfig.Settings.Size;
         }
 
         distinctRows = modConfig.Settings.DistinctRows;
-        Debug.Log(32);
+        
     }
 
     /// <summary>
@@ -196,8 +181,6 @@ public class BinaryPuzzlePlus : MonoBehaviour
     {
         const float scaleFactor = 1.18f;
         buttons = new List<Button>();
-        leftEdges = new GameObject[size * size];
-        upEdges = new GameObject[size * size];
 
         //instantiate the buttons base on the size
 
@@ -238,25 +221,32 @@ public class BinaryPuzzlePlus : MonoBehaviour
         }
 
 
-        //for each left edge, instantiate an edge prefab in the middle of the two buttons it connects
+        //for each left edge, instantiate an edge prefab in the middle of the two buttons
         for (int ix = 0; ix < buttons.Count; ix++)
         {
             int row = ix / size;
             int col = ix % size;
 
-            if (col != 0)
+            Button button = buttons[ix];
+            button.Cell = givenPuzzle.Cells[ix];
+
+            if (col != 0 && givenPuzzle.Cells[ix].Left != null && givenPuzzle.Cells[ix].Left.Constraint != EdgeState.None)
             {
-                Button button = buttons[ix];
                 Button leftButton = buttons[ix - 1];
-                leftEdges[ix] = GetNewEdge(leftButton, button, xScale, zScale, false);
+                GameObject edge = GetNewEdge(leftButton, button, xScale, zScale, false);
+                SpriteRenderer sprite = edge.transform.Find("Sprite").GetComponent<SpriteRenderer>();
+                sprite.sprite = button.Cell.Left.Constraint == EdgeState.Equal ? EqualSprite : XSprite;
             }
 
-            if (row != 0)
+            if (row != 0 && givenPuzzle.Cells[ix].Up != null && givenPuzzle.Cells[ix].Up.Constraint != EdgeState.None)
             {
-                Button button = buttons[ix];
                 Button upButton = buttons[ix - size];
-                upEdges[ix] = GetNewEdge(button, upButton, xScale, zScale, true);
+                GameObject edge = GetNewEdge(button, upButton, xScale, zScale, true);
+                SpriteRenderer sprite = edge.transform.Find("Sprite").GetComponent<SpriteRenderer>();
+                sprite.sprite = button.Cell.Up.Constraint == EdgeState.Equal ? EqualSprite : XSprite;
+
             }
+
         }
     }
 
@@ -280,63 +270,31 @@ public class BinaryPuzzlePlus : MonoBehaviour
     /// </summary>
     void UpdateVisuals(PuzzleState state)
     {
-        Debug.Log(33);
         for (int ix = 0; ix < size * size; ix++)
         {
-
             Cell c = state.Cells[ix];
-            Debug.Log(34);
+            
             Button b = buttons[ix];
-            Debug.Log(35);
-            GameObject leftEdge = leftEdges[ix];
-            Debug.Log(36);
-            GameObject upEdge = upEdges[ix];
-            Debug.Log(37);
 
             //change the background color
             b.MeshRenderer.sharedMaterial = c.state == CellState.Empty ? defaultMaterial : c.state == CellState.One ? yellowMaterial : blueMaterial;
-            Debug.Log(38);
+            
 
             //change the text
             b.Label.text = c.state == CellState.Empty ? "" : c.state == CellState.One ? "1" : "0";
-            Debug.Log(39);
-
-            //set edges that exist
-            if (leftEdge != null)
-            {
-                ChangeEdgeSymbol(leftEdge, c.Left.Constraint);
-                Debug.Log(40);
-            }
-
-            if (upEdge != null)
-            {
-                ChangeEdgeSymbol(upEdge, c.Up.Constraint);
-                Debug.Log(41);
-            }
         }
-    }
-
-    void ChangeEdgeSymbol(GameObject edge, EdgeState state)
-    {
-        //if the text is "", hide the gameobject
-        if (state == EdgeState.None)
-        {
-            edge.SetActive(false);
-            return;
-        }
-
-        edge.transform.Find("Sprite").GetComponent<SpriteRenderer>().sprite = state == EdgeState.Equal ? EqualSprite : XSprite;
     }
 
     private void ButtonPress(Button button)
     {
         //if the cell is given, don't do anything
-        if (moduleSolved || givenPuzzle.Cells[buttons.IndexOf(button)].state != CellState.Empty)
+        int buttonIndex = buttons.IndexOf(button);
+        if (moduleSolved || givenPuzzle.Cells[buttonIndex].state != CellState.Empty)
             return;
 
         //cycle through the states
         button.Cell.state = (CellState)(((int)button.Cell.state + 1) % 3);
-        currentState.Cells[buttons.IndexOf(button)].state = button.Cell.state;
+        currentState.Cells[buttonIndex].state = button.Cell.state;
         UpdateVisuals(currentState);
 
         //Check if the puzzle is solved
@@ -348,8 +306,16 @@ public class BinaryPuzzlePlus : MonoBehaviour
 
     private void ResetGrid()
     {
+        if (moduleSolved)
+            return;
         currentState = new PuzzleState(givenPuzzle);
-        buttons.ForEach(b => b.Cell = currentState.Cells[buttons.IndexOf(b)]);
+
+        for (int i = 0; i < size * size; i++)
+        {
+            Cell puzzleCell = currentState.Cells[i];
+            //update the cells to match the buttons
+            buttons[i].Cell = puzzleCell;
+        }
         UpdateVisuals(currentState);
     }
 

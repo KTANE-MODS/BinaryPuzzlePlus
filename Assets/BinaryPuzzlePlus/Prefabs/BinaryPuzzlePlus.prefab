@@ -60,7 +60,7 @@ GameObject:
   - component: {fileID: 33885385016194340}
   - component: {fileID: 23832812395254498}
   - component: {fileID: 114995766900467520}
-  - component: {fileID: 114604875623661768}
+  - component: {fileID: 114995912548567242}
   m_Layer: 0
   m_Name: Reset Button
   m_TagString: Untagged
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 4633793547886946}
   - component: {fileID: 23200497957100096}
   - component: {fileID: 102387831199479620}
-  - component: {fileID: 114465161851089240}
+  - component: {fileID: 114222182783457402}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -114,7 +114,7 @@ GameObject:
   - component: {fileID: 33734355568068210}
   - component: {fileID: 23007223309289702}
   - component: {fileID: 114201571617698530}
-  - component: {fileID: 114902789227444842}
+  - component: {fileID: 114324993857559030}
   m_Layer: 0
   m_Name: Highlight
   m_TagString: Untagged
@@ -257,20 +257,20 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1766296366206246}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.0000399, y: 1.0000399, z: 1.0000399}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.23, z: 0}
+  m_LocalScale: {x: 10.533054, y: 2.667711, z: 2.5939844}
   m_Children: []
   m_Father: {fileID: 4502476327475914}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!23 &23007223309289702
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1766296366206246}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -278,7 +278,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 8b7f362ea710e31438ef02dd136bbd49, type: 2}
+  - {fileID: 2100000, guid: 5f9a3d1f2de088c41abe352e0c799f21, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -420,7 +420,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1766296366206246}
-  m_Mesh: {fileID: 4300000, guid: d2a3e436224989543bf8c65238a5a3b7, type: 3}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!33 &33885385016194340
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -510,41 +510,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlightScale: {x: 1, y: 1, z: 1}
   OutlineAmount: 0
---- !u!114 &114288796472975574
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1076415141506648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1675560866, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &114328495816104152
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1076415141506648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1702003387, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Parent: {fileID: 114328495816104152}
-  Children:
-  - {fileID: 114995766900467520}
-  IsPassThrough: 0
-  ChildRowLength: 0
-  Highlight: {fileID: 114090403488375384}
-  SelectableColliders: []
-  DefaultSelectableIndex: 0
-  AllowSelectionWrapX: 0
-  AllowSelectionWrapY: 0
-  ForceSelectionHighlight: 0
-  ForceInteractionHighlight: 0
---- !u!114 &114465161851089240
+--- !u!114 &114222182783457402
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -557,19 +523,53 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - GUI/KT 3D Text Diffuse
---- !u!114 &114604875623661768
+--- !u!114 &114288796472975574
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1277617486442562}
+  m_GameObject: {fileID: 1076415141506648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1675560866, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114324993857559030
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1766296366206246}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShaderNames:
-  - KT/Mobile/DiffuseTint
+  - KT/Outline
+--- !u!114 &114328495816104152
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1076415141506648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1702003387, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Parent: {fileID: 0}
+  Children:
+  - {fileID: 114995766900467520}
+  IsPassThrough: 0
+  ChildRowLength: 6
+  Highlight: {fileID: 114090403488375384}
+  SelectableColliders: []
+  DefaultSelectableIndex: 0
+  AllowSelectionWrapX: 0
+  AllowSelectionWrapY: 0
+  ForceSelectionHighlight: 0
+  ForceInteractionHighlight: 0
 --- !u!114 &114662811612611870
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -595,30 +595,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17787df24b2c65a42acf324cb32bda4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  XSprite: {fileID: 0}
-  EqualSprite: {fileID: 0}
+  XSprite: {fileID: 21300000, guid: 9c6ce4bf7f90cfc438f9a96d297c81a4, type: 3}
+  EqualSprite: {fileID: 21300000, guid: f84b331bf0619df4bb432631b43a1bc6, type: 3}
   buttonPrefab: {fileID: 1846257432158418, guid: 179262fdc3802b24f914d9bb748cdb15,
     type: 2}
   edgePrefab: {fileID: 1532209651888066, guid: 1cd8049c65c1d344e9683718bfe48d7c, type: 2}
   resetButton: {fileID: 114995766900467520}
   size: 6
-  distinctRows: 0
+  distinctRows: 1
   defaultMaterial: {fileID: 2100000, guid: 8b7f362ea710e31438ef02dd136bbd49, type: 2}
   yellowMaterial: {fileID: 2100000, guid: 420628c2a383e894684378fb464058cb, type: 2}
   blueMaterial: {fileID: 2100000, guid: 38e80221f00907d46b121a6447f52e9e, type: 2}
---- !u!114 &114902789227444842
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1766296366206246}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShaderNames:
-  - KT/Mobile/DiffuseTint
 --- !u!114 &114995766900467520
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -630,7 +617,7 @@ MonoBehaviour:
   m_Script: {fileID: 1702003387, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Parent: {fileID: 114995766900467520}
+  Parent: {fileID: 114328495816104152}
   Children: []
   IsPassThrough: 0
   ChildRowLength: 0
@@ -641,3 +628,16 @@ MonoBehaviour:
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
   ForceInteractionHighlight: 0
+--- !u!114 &114995912548567242
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1277617486442562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
